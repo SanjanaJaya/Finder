@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'lecturer_list.dart'; // Import the Lecturer List Page
+import 'lecturer_list.dart'; // Lecturer List Page
+import 'study_room_list.dart'; // Study Room List Page
+import 'contact_us.dart'; // Contact Us Page
+import 'about_us.dart'; // About Us Page ✅
 
 void main() {
   runApp(MyApp());
@@ -66,8 +69,8 @@ class HomePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildActionButton(context, "assets/location.png", "Meet Your\nLecturer", LecturerListPage()), // Updated
-                    _buildActionButton(context, "assets/calendar.png", "Book Study\nRoom", null),
+                    _buildActionButton(context, "assets/location.png", "Meet Your\nLecturer", LecturerListPage()),
+                    _buildActionButton(context, "assets/calendar.png", "Book Study\nRoom", StudyRoomListPage()),
                     _buildActionButton(context, "assets/list.png", "View\nBookings", null),
                   ],
                 ),
@@ -86,8 +89,8 @@ class HomePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildBottomButton("assets/contact.png", "Contact Us"),
-                    _buildBottomButton("assets/about.png", "About Us"),
+                    _buildBottomButton(context, "assets/contact.png", "Contact Us", ContactUsPage()),
+                    _buildBottomButton(context, "assets/about.png", "About Us", AboutUsPage()), // ✅ Navigates to About Us Page
                   ],
                 ),
               ],
@@ -98,7 +101,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // 🔹 Quick Action Button Widget (Now Supports Navigation)
+  // 🔹 Quick Action Button Widget (Supports Navigation)
   Widget _buildActionButton(BuildContext context, String iconPath, String label, Widget? page) {
     return GestureDetector(
       onTap: () {
@@ -125,23 +128,30 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Bottom Button Widget
-  Widget _buildBottomButton(String iconPath, String label) {
-    return Container(
-      width: 140,
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(iconPath, width: 24, height: 24),
-          SizedBox(width: 10),
-          Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        ],
+  // 🔹 Bottom Button Widget (Supports Navigation)
+  Widget _buildBottomButton(BuildContext context, String iconPath, String label, Widget? page) {
+    return GestureDetector(
+      onTap: () {
+        if (page != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+        }
+      },
+      child: Container(
+        width: 140,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(iconPath, width: 24, height: 24),
+            SizedBox(width: 10),
+            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'lecturer_list.dart'; // Lecturer List Page
 import 'study_room_list.dart'; // Study Room List Page
 import 'contact_us.dart'; // Contact Us Page
 import 'about_us.dart'; // About Us Page ✅
+import 'view_bookings.dart'; // Import the View Bookings Page
 
 void main() {
   runApp(MyApp());
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: HomePage(), // Set HomePage as the start
     );
   }
 }
@@ -71,7 +72,7 @@ class HomePage extends StatelessWidget {
                   children: [
                     _buildActionButton(context, "assets/location.png", "Meet Your\nLecturer", LecturerListPage()),
                     _buildActionButton(context, "assets/calendar.png", "Book Study\nRoom", StudyRoomListPage()),
-                    _buildActionButton(context, "assets/list.png", "View\nBookings", null),
+                    _buildActionButton(context, "assets/list.png", "View\nBookings", ViewBookingsPage()), // Updated to navigate to ViewBookingsPage
                   ],
                 ),
                 SizedBox(height: 20),

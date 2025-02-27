@@ -1,28 +1,10 @@
 import 'package:flutter/material.dart';
-import 'lecturer_list.dart'; // Lecturer List Page
-import 'study_room_list.dart'; // Study Room List Page
 import 'contact_us.dart'; // Contact Us Page
 import 'about_us.dart'; // About Us Page ✅
-import 'view_bookings.dart'; // Import the View Bookings Page
-import 'student_profile_page.dart'; // Import the Student Profile Page
-import 'lecturer_home.dart'; // Import Lecturer Home Page
+import 'lecturer_list.dart';
 
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class LecturerHomePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LecturerHomePage(), // Set LecturerHomePage as the start
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +29,7 @@ class HomePage extends StatelessWidget {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => StudentProfilePage()),
+                              MaterialPageRoute(builder: (context) => LecturerProfilePage()),
                             );
                           },
                           child: Icon(Icons.person, size: 30),

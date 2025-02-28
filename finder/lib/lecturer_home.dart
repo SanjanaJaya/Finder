@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'contact_us.dart'; // Contact Us Page
 import 'about_us.dart'; // About Us Page ✅
 import 'lecturer_list.dart';
+import 'view_bookings.dart'; // Import the View Bookings Page
+import 'study_room_list.dart'; // Study Room List Page
+import 'student_profile_page.dart'; // Import the Student Profile Page
 
 class LecturerHomePage extends StatelessWidget {
   @override
@@ -12,7 +15,10 @@ class LecturerHomePage extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 10.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -20,7 +26,10 @@ class LecturerHomePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset("assets/NSBM_logo.png", width: 130), // University Logo
+                    Image.asset(
+                      "assets/NSBM_logo.png",
+                      width: 130,
+                    ), // University Logo
                     Row(
                       children: [
                         Icon(Icons.arrow_back, size: 30),
@@ -29,7 +38,9 @@ class LecturerHomePage extends StatelessWidget {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => LecturerProfilePage()),
+                              MaterialPageRoute(
+                                builder: (context) => StudentProfilePage(),
+                              ),
                             );
                           },
                           child: Icon(Icons.person, size: 30),
@@ -46,13 +57,22 @@ class LecturerHomePage extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.asset("assets/campus.png", width: double.infinity, height: 150, fit: BoxFit.cover),
+                      child: Image.asset(
+                        "assets/campus.png",
+                        width: double.infinity,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        "Good Morning,\nSanjana Jayasooriya",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        "Good Morning,\nProf.Chaminda Rthnayake",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -63,19 +83,42 @@ class LecturerHomePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildActionButton(context, "assets/location.png", "Meet Your\nLecturer", LecturerListPage()),
-                    _buildActionButton(context, "assets/calendar.png", "Book Study\nRoom", StudyRoomListPage()),
-                    _buildActionButton(context, "assets/list.png", "View\nBookings", ViewBookingsPage()), // Updated to navigate to ViewBookingsPage
+                    _buildActionButton(
+                      context,
+                      "assets/Switch.png",
+                      "Mark Your\nAvailability",
+                      LecturerListPage(),
+                    ),
+                    _buildActionButton(
+                      context,
+                      "assets/appointment.png",
+                      "Appointments",
+                      StudyRoomListPage(),
+                    ),
+                    _buildActionButton(
+                      context,
+                      "assets/inbox.png",
+                      "Inbox",
+                      ViewBookingsPage(),
+                    ), // Updated to navigate to ViewBookingsPage
                   ],
                 ),
                 SizedBox(height: 20),
 
                 // Latest News Section
-                Text("LATEST NEWS", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                Text(
+                  "LATEST NEWS",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
                 SizedBox(height: 10),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.asset("assets/classroom.png", width: double.infinity, height: 180, fit: BoxFit.cover),
+                  child: Image.asset(
+                    "assets/Home.jpg",
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 SizedBox(height: 20),
 
@@ -83,8 +126,18 @@ class LecturerHomePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildBottomButton(context, "assets/contact.png", "Contact Us", ContactUsPage()),
-                    _buildBottomButton(context, "assets/about.png", "About Us", AboutUsPage()), // ✅ Navigates to About Us Page
+                    _buildBottomButton(
+                      context,
+                      "assets/contact.png",
+                      "Contact Us",
+                      ContactUsPage(),
+                    ),
+                    _buildBottomButton(
+                      context,
+                      "assets/about.png",
+                      "About Us",
+                      AboutUsPage(),
+                    ), // ✅ Navigates to About Us Page
                   ],
                 ),
               ],
@@ -96,11 +149,19 @@ class LecturerHomePage extends StatelessWidget {
   }
 
   // 🔹 Quick Action Button Widget (Supports Navigation)
-  Widget _buildActionButton(BuildContext context, String iconPath, String label, Widget? page) {
+  Widget _buildActionButton(
+    BuildContext context,
+    String iconPath,
+    String label,
+    Widget? page,
+  ) {
     return GestureDetector(
       onTap: () {
         if (page != null) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
         }
       },
       child: Column(
@@ -116,18 +177,30 @@ class LecturerHomePage extends StatelessWidget {
             child: Center(child: Image.asset(iconPath, width: 50, height: 50)),
           ),
           SizedBox(height: 8),
-          Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
   }
 
   // 🔹 Bottom Button Widget (Supports Navigation)
-  Widget _buildBottomButton(BuildContext context, String iconPath, String label, Widget? page) {
+  Widget _buildBottomButton(
+    BuildContext context,
+    String iconPath,
+    String label,
+    Widget? page,
+  ) {
     return GestureDetector(
       onTap: () {
         if (page != null) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page),
+          );
         }
       },
       child: Container(
@@ -143,7 +216,10 @@ class LecturerHomePage extends StatelessWidget {
           children: [
             Image.asset(iconPath, width: 24, height: 24),
             SizedBox(width: 10),
-            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
           ],
         ),
       ),

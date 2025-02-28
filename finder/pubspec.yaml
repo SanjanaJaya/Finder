@@ -34,3 +34,6 @@ flutter:
     - assets/lecturer.png
     - assets/student.png
     - assets/Home.jpg
+    - assets/appointment.png
+    - assets/inbox.png
+    - assets/Switch.png

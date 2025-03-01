@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'contact_us.dart'; // Contact Us Page
 import 'about_us.dart'; // About Us Page ✅
-import 'lecturer_list.dart';
 import 'view_bookings.dart'; // Import the View Bookings Page
 import 'study_room_list.dart'; // Study Room List Page
-import 'student_profile_page.dart'; // Import the Student Profile Page
+import 'student_profile_page.dart';
+import 'lecturer_availability.dart';
 
 class LecturerHomePage extends StatelessWidget {
   @override
@@ -86,8 +86,8 @@ class LecturerHomePage extends StatelessWidget {
                     _buildActionButton(
                       context,
                       "assets/Switch.png",
-                      "Mark Your\nAvailability",
-                      LecturerListPage(),
+                      "Availability",
+                      LecturerAvailabilityPage(),
                     ),
                     _buildActionButton(
                       context,

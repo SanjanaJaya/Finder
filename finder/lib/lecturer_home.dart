@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'contact_us.dart'; // Contact Us Page
 import 'about_us.dart'; // About Us Page ✅
-import 'view_bookings.dart'; // Import the View Bookings Page
-import 'study_room_list.dart'; // Study Room List Page
 import 'student_profile_page.dart';
 import 'lecturer_availability.dart';
+import 'lecturers_appointment.dart';
+import 'lecturer_inbox.dart';
 
 class LecturerHomePage extends StatelessWidget {
   @override
@@ -93,13 +93,13 @@ class LecturerHomePage extends StatelessWidget {
                       context,
                       "assets/appointment.png",
                       "Appointments",
-                      StudyRoomListPage(),
+                      LecturersAppointment(),
                     ),
                     _buildActionButton(
                       context,
                       "assets/inbox.png",
                       "Inbox",
-                      ViewBookingsPage(),
+                      LecturerInbox(),
                     ), // Updated to navigate to ViewBookingsPage
                   ],
                 ),
@@ -204,7 +204,7 @@ class LecturerHomePage extends StatelessWidget {
         }
       },
       child: Container(
-        width: 140,
+        width: 170,
         height: 50,
         decoration: BoxDecoration(
           color: Colors.white,

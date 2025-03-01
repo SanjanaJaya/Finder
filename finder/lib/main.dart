@@ -218,7 +218,7 @@ class HomePage extends StatelessWidget {
         }
       },
       child: Container(
-        width: 140,
+        width: 170,
         height: 50,
         decoration: BoxDecoration(
           color: Colors.white,

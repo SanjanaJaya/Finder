@@ -4,49 +4,90 @@ class ContactUsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffeee7da), // Beige background
+      backgroundColor: const Color(0xffeee7da), // Beige background
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text("Contact Us", style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
-        centerTitle: false,
+        title: const Text(
+          "Contact Us",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset("assets/NSBM_logo.png", width: 200), // University Logo
-            SizedBox(height: 20),
+            // University Logo
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 5,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Image.asset("assets/NSBM_logo.png", width: 150),
+            ),
+            const SizedBox(height: 25),
 
-            _buildContactRow(Icons.location_on, "Mahenwaththa, Pitipana, Homagama, Sri Lanka"),
-            _buildContactRow(Icons.phone, "+94 11 544 5000"),
-            _buildContactRow(Icons.phone, "+94 71 244 5000"),
-            _buildContactRow(Icons.email, "inquiries@nsbm.ac.lk"),
+            // Contact Info Section
+            _buildContactCard(
+              Icons.location_on,
+              "Mahenwaththa, Pitipana, Homagama, Sri Lanka",
+            ),
+            _buildContactCard(Icons.phone, "+94 11 544 5000"),
+            _buildContactCard(Icons.phone, "+94 71 244 5000"),
+            _buildContactCard(Icons.email, "inquiries@nsbm.ac.lk"),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContactRow(IconData icon, String text) {
+  // Contact Card with Icons & Text
+  Widget _buildContactCard(IconData icon, String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.black, size: 24),
-          SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 1),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.black, size: 28),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

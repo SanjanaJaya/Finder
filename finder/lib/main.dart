@@ -6,6 +6,7 @@ import 'about_us.dart'; // About Us Page ✅
 import 'view_bookings.dart'; // Import the View Bookings Page
 import 'student_profile_page.dart'; // Import the Student Profile Page
 import 'lecturer_home.dart'; // Import Lecturer Home Page
+import 'opening_page.dart';
 
 void main() {
   runApp(MyApp());

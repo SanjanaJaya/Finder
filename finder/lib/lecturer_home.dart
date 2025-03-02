@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'contact_us.dart'; // Contact Us Page
-import 'about_us.dart'; // About Us Page ✅
-import 'student_profile_page.dart';
+import 'contact_us.dart';
+import 'about_us.dart';
+import 'lecturer_profile_page.dart';
 import 'lecturer_availability.dart';
 import 'lecturers_appointment.dart';
 import 'lecturer_inbox.dart';
@@ -39,7 +39,7 @@ class LecturerHomePage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => StudentProfilePage(),
+                                builder: (context) => LecturerProfilePage(),
                               ),
                             );
                           },

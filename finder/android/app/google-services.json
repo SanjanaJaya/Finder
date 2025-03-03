@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702864049476",
+    "project_id": "finder-cc54d",
+    "storage_bucket": "finder-cc54d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702864049476:android:aec4bafc409cd4b8bc0311",
+        "android_client_info": {
+          "package_name": "com.example.finder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAQDSpYq-amYipWdiLUeLqPsoavzD4_qo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

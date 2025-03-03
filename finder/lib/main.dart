@@ -7,12 +7,8 @@ import 'view_bookings.dart'; // Import the View Bookings Page
 import 'student_profile_page.dart'; // Import the Student Profile Page
 import 'lecturer_home.dart'; // Import Lecturer Home Page
 import 'opening_page.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+void main() {
   runApp(MyApp());
 }
 

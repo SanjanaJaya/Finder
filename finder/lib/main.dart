@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'lecturer_list.dart'; // Lecturer List Page
 import 'study_room_list.dart'; // Study Room List Page
 import 'contact_us.dart'; // Contact Us Page
@@ -6,9 +8,11 @@ import 'about_us.dart'; // About Us Page ✅
 import 'view_bookings.dart'; // Import the View Bookings Page
 import 'student_profile_page.dart'; // Import the Student Profile Page
 import 'lecturer_home.dart'; // Import Lecturer Home Page
-import 'opening_page.dart';
+import 'opening_page.dart'; // Opening page for the app
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Firebase is initialized before app runs
+  await Firebase.initializeApp(); // Initialize Firebase
   runApp(MyApp());
 }
 
@@ -19,13 +23,41 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LecturerHomePage(), // Set LecturerHomePage as the start
+      home: StreamBuilder<User?>(
+        stream:
+            FirebaseAuth.instance
+                .authStateChanges(), // Listen to Firebase authentication state changes
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            ); // Show loading indicator while checking auth state
+          }
+
+          if (snapshot.hasData) {
+            // User is logged in, navigate to HomePage
+            return HomePage();
+          } else {
+            // User is not logged in, show OpeningPage
+            return OpeningPage();
+          }
+        },
+      ),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  // Function to handle logout
+  void _logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => OpeningPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +83,13 @@ class HomePage extends StatelessWidget {
                     ), // University Logo
                     Row(
                       children: [
-                        Icon(Icons.arrow_back, size: 30),
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, size: 30),
+                          onPressed:
+                              () => _logout(
+                                context,
+                              ), // Logout on back arrow press
+                        ),
                         SizedBox(width: 15),
                         GestureDetector(
                           onTap: () {

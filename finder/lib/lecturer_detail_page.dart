@@ -84,13 +84,12 @@ class LecturerDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                // Navigate to the StudentChatScreen with lecturer details
+                // Navigate to StudentChatScreen with Lecturer's Email
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => StudentChatScreen(
-                      lecturerId: lecturer['L_First_Name'] + lecturer['L_Last_Name'], // Unique ID for lecturer
-                      lecturerName: "${lecturer['L_First_Name']} ${lecturer['L_Last_Name']}",
+                      lecturerEmail: lecturer['Email'], // Pass lecturer's email
                     ),
                   ),
                 );

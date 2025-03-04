@@ -43,5 +43,6 @@ flutter {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.android.gms:play-services-base:18.2.0") // Or latest version
     
 }

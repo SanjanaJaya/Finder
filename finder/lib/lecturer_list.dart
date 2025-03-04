@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LecturerListPage extends StatefulWidget {
   @override
@@ -6,24 +7,39 @@ class LecturerListPage extends StatefulWidget {
 }
 
 class _LecturerListPageState extends State<LecturerListPage> {
-  final List<String> lecturers = [
-    "Prof. Chaminda Rathnayake",
-    "Prof. Baratha Dodankotuwa",
-    "Prof. Shanthi Segarajasingham",
-    "Prof. Noel Fernando",
-    "Prof. Dushar Dayarathna",
-    "Prof. Chaminda Wijesinghe",
-    "Ms. Thilini De Silva",
-    "Dr. Chandana Perera",
-    "Prof. Chaminda Wijesinghe",
-    "Dr. Rasika Ranaweera",
-    "Dr. Mohamed Shafraz"
-  ];
+  List<Map<String, dynamic>> lecturers = [];
+  bool isLoading = true;
+  String errorMessage = "";
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLecturers();
+  }
+
+  Future<void> fetchLecturers() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot querySnapshot = await firestore.collection('Lecturer').get();
+
+      setState(() {
+        lecturers = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+        isLoading = false;
+        errorMessage = "";
+      });
+    } catch (e) {
+      print("Error fetching lecturers: $e");
+      setState(() {
+        isLoading = false;
+        errorMessage = "Error loading lecturer data: $e";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEEE7DA), // Background color
+      backgroundColor: Color(0xFFEEE7DA),
       appBar: AppBar(
         backgroundColor: Color(0xFFEEE7DA),
         elevation: 0,
@@ -38,7 +54,6 @@ class _LecturerListPageState extends State<LecturerListPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            // Search Bar
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -61,9 +76,17 @@ class _LecturerListPageState extends State<LecturerListPage> {
               ),
             ),
             SizedBox(height: 20),
-            // Lecturer List
             Expanded(
-              child: ListView.builder(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : errorMessage.isNotEmpty
+                  ? Center(
+                child: Text(
+                  errorMessage,
+                  style: TextStyle(color: Colors.red),
+                ),
+              )
+                  : ListView.builder(
                 itemCount: lecturers.length,
                 itemBuilder: (context, index) {
                   return Padding(
@@ -71,11 +94,11 @@ class _LecturerListPageState extends State<LecturerListPage> {
                     child: Container(
                       padding: EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: Color(0xFFAECBAD), // Greenish button color
+                        color: Color(0xFFAECBAD),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Text(
-                        lecturers[index],
+                        "${lecturers[index]['L_First_Name']} ${lecturers[index]['L_Last_Name']}",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),

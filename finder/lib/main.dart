@@ -24,9 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: StreamBuilder<User?>(
-        stream:
-            FirebaseAuth.instance
-                .authStateChanges(), // Listen to Firebase authentication state changes
+        stream: FirebaseAuth.instance.authStateChanges(), // Listen to Firebase authentication state changes
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -85,10 +83,7 @@ class HomePage extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(Icons.arrow_back, size: 30),
-                          onPressed:
-                              () => _logout(
-                                context,
-                              ), // Logout on back arrow press
+                          onPressed: () => _logout(context), // Logout on back arrow press
                         ),
                         SizedBox(width: 15),
                         GestureDetector(
@@ -207,11 +202,11 @@ class HomePage extends StatelessWidget {
 
   // 🔹 Quick Action Button Widget (Supports Navigation)
   Widget _buildActionButton(
-    BuildContext context,
-    String iconPath,
-    String label,
-    Widget? page,
-  ) {
+      BuildContext context,
+      String iconPath,
+      String label,
+      Widget? page,
+      ) {
     return GestureDetector(
       onTap: () {
         if (page != null) {
@@ -246,11 +241,11 @@ class HomePage extends StatelessWidget {
 
   // 🔹 Bottom Button Widget (Supports Navigation)
   Widget _buildBottomButton(
-    BuildContext context,
-    String iconPath,
-    String label,
-    Widget? page,
-  ) {
+      BuildContext context,
+      String iconPath,
+      String label,
+      Widget? page,
+      ) {
     return GestureDetector(
       onTap: () {
         if (page != null) {

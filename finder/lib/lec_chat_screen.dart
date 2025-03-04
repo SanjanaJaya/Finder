@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
   final String studentName; // Pass student name from inbox
@@ -11,34 +12,34 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  late String lecturerEmail; // Assuming we will get this from authentication context
 
   @override
   void initState() {
     super.initState();
-    // Add a dummy received message when opening the chat
-    _messages.add({"text": "Hello, Professor!", "isSentByLecturer": false});
+    // Assuming lecturer's email is fetched from FirebaseAuth or passed into the screen
+    lecturerEmail = "lecturer@example.com"; // Replace with actual lecturer email
   }
 
-  void _sendMessage() {
+  // Send message to Firestore
+  void _sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      setState(() {
-        _messages.add({
-          "text": _messageController.text,
-          "isSentByLecturer": true, // Message is sent by the lecturer
-        });
-        _messageController.clear();
+      String messageText = _messageController.text.trim();
+      String studentName = widget.studentName;
 
-        // Simulate a student reply after a delay
-        Future.delayed(const Duration(seconds: 1), () {
-          setState(() {
-            _messages.add({
-              "text": "Thank you for your response!", // Simulated reply
-              "isSentByLecturer": false,
-            });
-          });
-        });
+      // Add the message to Firestore under a "Chats" collection
+      await _firestore.collection('Chats').add({
+        'studentName': studentName,
+        'lecturerEmail': lecturerEmail,
+        'message': messageText,
+        'isSentByLecturer': true, // Message sent by lecturer
+        'timestamp': FieldValue.serverTimestamp(),
       });
+
+      // Clear message field after sending
+      _messageController.clear();
     }
   }
 
@@ -66,34 +67,56 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                bool isSentByLecturer = _messages[index]["isSentByLecturer"];
-                return Align(
-                  alignment:
-                      isSentByLecturer
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('Chats')
+                  .where('studentName', isEqualTo: widget.studentName)
+                  .where('lecturerEmail', isEqualTo: lecturerEmail)
+                  .orderBy('timestamp') // Order messages by timestamp
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("No messages yet."));
+                }
+
+                var messages = snapshot.data!.docs;
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    var messageData = messages[index].data() as Map<String, dynamic>;
+                    bool isSentByLecturer = messageData['isSentByLecturer'];
+                    String messageText = messageData['message'];
+
+                    return Align(
+                      alignment: isSentByLecturer
                           ? Alignment.centerRight
                           : Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 15,
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    decoration: BoxDecoration(
-                      color: isSentByLecturer ? Colors.black : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _messages[index]["text"],
-                      style: TextStyle(
-                        color: isSentByLecturer ? Colors.white : Colors.black,
-                        fontSize: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 15,
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 5),
+                        decoration: BoxDecoration(
+                          color: isSentByLecturer ? Colors.black : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          messageText,
+                          style: TextStyle(
+                            color: isSentByLecturer ? Colors.white : Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),

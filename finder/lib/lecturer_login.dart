@@ -1,10 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'lecturer_home.dart'; // Import LecturerHomePage to navigate after successful login
 
-class LecturerLoginPage extends StatelessWidget {
+class LecturerLoginPage extends StatefulWidget {
+  @override
+  _LecturerLoginPageState createState() => _LecturerLoginPageState();
+}
+
+class _LecturerLoginPageState extends State<LecturerLoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  void _login() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    try {
+      // First, authenticate the user using Firebase Authentication
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        // If login is successful, query Firestore to check if the lecturer exists in the "Lecturer" collection
+        QuerySnapshot query = await _firestore
+            .collection('Lecturer')
+            .where('Email', isEqualTo: email)
+            .where('Password', isEqualTo: password) // Ensure plaintext passwords aren't stored in production
+            .get();
+
+        if (query.docs.isNotEmpty) {
+          // Navigate to the LecturerHomePage on successful login
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LecturerHomePage(),
+            ),
+          );
+        } else {
+          _showError("No account found with this email.");
+        }
+      } else {
+        _showError("Invalid email or password.");
+      }
+    } catch (e) {
+      _showError("Error: ${e.toString()}");
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5EEDA), // Light beige background
+      backgroundColor: Color(0xFFF5EEDA),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -12,24 +67,15 @@ class LecturerLoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // University Logo
               Image.asset(
-                'assets/NSBM_logo.png', // Ensure this image is in the assets folder
+                'assets/NSBM_logo.png',
                 height: 120,
               ),
               SizedBox(height: 30),
-
-              // Lecturer's Email Field
               _buildTextField("Lecturer’s E-mail", false),
-
               SizedBox(height: 15),
-
-              // Password Field
               _buildTextField("Password", true),
-
               SizedBox(height: 10),
-
-              // Sign Up Link
               GestureDetector(
                 onTap: () {
                   // Navigate to Sign Up Page (To be implemented)
@@ -43,16 +89,11 @@ class LecturerLoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-
               SizedBox(height: 20),
-
-              // Login Button
               ElevatedButton(
-                onPressed: () {
-                  // Handle Login (To be implemented)
-                },
+                onPressed: _login,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFA7B89C), // Greenish button color
+                  backgroundColor: Color(0xFFA7B89C),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -74,9 +115,9 @@ class LecturerLoginPage extends StatelessWidget {
     );
   }
 
-  // Function to build text fields
   Widget _buildTextField(String label, bool isPassword) {
     return TextField(
+      controller: isPassword ? _passwordController : _emailController,
       obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,

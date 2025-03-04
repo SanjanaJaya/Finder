@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'lecturer_detail_page.dart';
 
 class LecturerListPage extends StatefulWidget {
   @override
@@ -91,16 +92,21 @@ class _LecturerListPageState extends State<LecturerListPage> {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Container(
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFAECBAD),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Text(
+                    child: ListTile(
+                      title: Text(
                         "${lecturers[index]['L_First_Name']} ${lecturers[index]['L_Last_Name']}",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
+                      tileColor: Color(0xFFAECBAD),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LecturerDetailPage(lecturer: lecturers[index]),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },

@@ -1,32 +1,21 @@
 import 'package:flutter/material.dart';
-import 'lecturer_home.dart'; // Import the Lecturer Home page
-
-void main() {
-  runApp(const LecturerAvailabilityApp());
-}
-
-class LecturerAvailabilityApp extends StatelessWidget {
-  const LecturerAvailabilityApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LecturerAvailabilityPage(),
-    );
-  }
-}
+import 'lecturer_home.dart';
 
 class LecturerAvailabilityPage extends StatelessWidget {
+  final String lecturerUid;
+
+  const LecturerAvailabilityPage({Key? key, required this.lecturerUid})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEFE7DA),
+      backgroundColor: const Color(0xFFEFE7DA), // Light beige background
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -37,33 +26,42 @@ class LecturerAvailabilityPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Hi,',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Roboto', // Replace with your font
+              ),
             ),
-            SizedBox(height: 5),
-            Text(
+            const SizedBox(height: 5),
+            const Text(
               'Prof. Chaminda Rathnayake',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto', // Replace with your font
+              ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 onPressed: () {},
-                child: Text(
+                child: const Text(
                   'Select Your Availability Here!',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Center(
               child: Column(
                 children: [
@@ -73,7 +71,7 @@ class LecturerAvailabilityPage extends StatelessWidget {
                     text: 'AVAILABLE',
                     subtitle: 'MY CABIN',
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   _availabilityOption(
                     color: Colors.red,
                     icon: Icons.exit_to_app,
@@ -83,12 +81,13 @@ class LecturerAvailabilityPage extends StatelessWidget {
                 ],
               ),
             ),
-            Spacer(),
+            const Spacer(),
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -96,16 +95,20 @@ class LecturerAvailabilityPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => LecturerHomePage()),
+                    MaterialPageRoute(
+                      builder: (context) => LecturerHomePage(
+                        lecturerUid: lecturerUid,
+                      ),
+                    ),
                   );
                 },
-                child: Text(
+                child: const Text(
                   'DONE',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -126,7 +129,7 @@ class LecturerAvailabilityPage extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(15),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 5,
@@ -139,23 +142,28 @@ class LecturerAvailabilityPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: 40, color: Colors.white),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   text,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
+                    fontFamily: 'Roboto', // Replace with your font
                   ),
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           subtitle,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Roboto', // Replace with your font
+          ),
         ),
       ],
     );

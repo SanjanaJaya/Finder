@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'student_chat_screen.dart'; // Import the StudentChatScreen
+import 'student_chat_screen.dart';
 
 class LecturerDetailPage extends StatelessWidget {
   final Map<String, dynamic> lecturer;
@@ -32,7 +32,8 @@ class LecturerDetailPage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage('assets/profile_placeholder.png'), // Change as needed
+              backgroundImage:
+              AssetImage('assets/profile_placeholder.png'), // Change as needed
             ),
             const SizedBox(height: 10),
             Text(
@@ -84,12 +85,13 @@ class LecturerDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                // Navigate to StudentChatScreen with Lecturer's Email
+                // Navigate to StudentChatScreen with Lecturer's Email and uid
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => StudentChatScreen(
-                      lecturerEmail: lecturer['Email'], // Pass lecturer's email
+                      lecturerEmail: lecturer['Email'],
+                      lecturerId: lecturer['uid'],
                     ),
                   ),
                 );

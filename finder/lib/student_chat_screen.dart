@@ -4,8 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentChatScreen extends StatefulWidget {
   final String lecturerEmail;
+  final String lecturerId;
 
-  StudentChatScreen({required this.lecturerEmail});
+  StudentChatScreen({required this.lecturerEmail, required this.lecturerId});
 
   @override
   _StudentChatScreenState createState() => _StudentChatScreenState();
@@ -16,7 +17,6 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  String? _lecturerId;
   String? _lecturerName;
   String? _studentId;
 
@@ -26,19 +26,22 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
     fetchUserDetails();
   }
 
-  /// Fetch Lecturer and Student IDs
   Future<void> fetchUserDetails() async {
     try {
       final user = _auth.currentUser;
       if (user == null) return;
 
-      _studentId = user.uid; // Get logged-in student's ID
+      _studentId = user.uid;
 
-      var query = await _firestore.collection('Lecturer').where('Email', isEqualTo: widget.lecturerEmail).get();
+      // No need to fetch lecturerId here as it's passed from LecturerDetailPage
+      var query = await _firestore
+          .collection('Lecturer')
+          .where('Email', isEqualTo: widget.lecturerEmail)
+          .get();
       if (query.docs.isNotEmpty) {
         setState(() {
-          _lecturerId = query.docs.first['uid']; // Lecturer UID from Firestore
-          _lecturerName = "${query.docs.first['L_First_Name']} ${query.docs.first['L_Last_Name']}";
+          _lecturerName =
+          "${query.docs.first['L_First_Name']} ${query.docs.first['L_Last_Name']}";
         });
       }
     } catch (e) {
@@ -46,14 +49,13 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
     }
   }
 
-  /// Send Message to Firestore
   void sendMessage() async {
-    if (_messageController.text.trim().isEmpty || _lecturerId == null || _studentId == null) return;
+    if (_messageController.text.trim().isEmpty || _studentId == null) return;
 
     try {
       await _firestore.collection('messages').add({
-        'senderId': _studentId, // Ensure sender ID is correctly assigned
-        'receiverId': _lecturerId,
+        'senderId': _studentId,
+        'receiverId': widget.lecturerId, // Use the passed lecturerId
         'message': _messageController.text.trim(),
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -67,22 +69,17 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_lecturerName != null ? "Chat with $_lecturerName" : "Chat"),
+        title: Text(
+            _lecturerName != null ? "Chat with $_lecturerName" : "Chat"),
         backgroundColor: Colors.blue,
       ),
       body: Column(
         children: [
           Expanded(
-            child: _lecturerId == null
-                ? const Center(child: CircularProgressIndicator())
-                : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: _firestore
                   .collection('messages')
-                  .where(Filter.or(
-                Filter('senderId', isEqualTo: _studentId),
-                Filter('receiverId', isEqualTo: _studentId),
-              ))
-                  .orderBy('timestamp', descending: true)
+                  .where('receiverId', isEqualTo: widget.lecturerId) // Filter messages by lecturerId
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
@@ -93,25 +90,42 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
                 }
 
                 var messages = snapshot.data!.docs;
+
+                // Sort messages by timestamp in descending order
+                messages.sort((a, b) {
+                  Timestamp timestampA = a.data()?['timestamp'] ?? Timestamp.fromMillisecondsSinceEpoch(0);
+                  Timestamp timestampB = b.data()?['timestamp'] ?? Timestamp.fromMillisecondsSinceEpoch(0);
+                  return timestampB.compareTo(timestampA);
+                });
+
                 return ListView.builder(
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     var message = messages[index].data();
+
+                    if (message == null) {
+                      return const ListTile(
+                          title: Text("Error: Message data is missing."));
+                    }
+
                     bool isMe = message['senderId'] == _studentId;
 
                     return Align(
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment:
+                      isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
                         padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 10),
                         decoration: BoxDecoration(
                           color: isMe ? Colors.blue : Colors.grey[300],
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           message['message'],
-                          style: TextStyle(color: isMe ? Colors.white : Colors.black),
+                          style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black),
                         ),
                       ),
                     );

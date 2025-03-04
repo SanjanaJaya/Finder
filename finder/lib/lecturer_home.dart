@@ -7,11 +7,15 @@ import 'lecturers_appointment.dart';
 import 'lecturer_inbox.dart';
 
 class LecturerHomePage extends StatelessWidget {
-  @override
+  final String lecturerUid; // Add lecturerUid to the constructor
+
+  const LecturerHomePage({Key? key, required this.lecturerUid})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffeee7da), // Beige Background
+      backgroundColor: const Color(0xffeee7da),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -22,18 +26,17 @@ class LecturerHomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Section: Logo, Back & Profile Icons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Image.asset(
                       "assets/NSBM_logo.png",
                       width: 130,
-                    ), // University Logo
+                    ),
                     Row(
                       children: [
-                        Icon(Icons.arrow_back, size: 30),
-                        SizedBox(width: 15),
+                        const Icon(Icons.arrow_back, size: 30),
+                        const SizedBox(width: 15),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -43,15 +46,13 @@ class LecturerHomePage extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Icon(Icons.person, size: 30),
+                          child: const Icon(Icons.person, size: 30),
                         ),
                       ],
                     ),
                   ],
                 ),
-                SizedBox(height: 15),
-
-                // Welcome Banner
+                const SizedBox(height: 15),
                 Stack(
                   alignment: Alignment.bottomLeft,
                   children: [
@@ -64,8 +65,8 @@ class LecturerHomePage extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
+                    const Padding(
+                      padding: EdgeInsets.all(12.0),
                       child: Text(
                         "Good Morning,\nProf.Chaminda Rthnayake",
                         style: TextStyle(
@@ -77,9 +78,7 @@ class LecturerHomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
-
-                // Quick Action Buttons
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -87,7 +86,7 @@ class LecturerHomePage extends StatelessWidget {
                       context,
                       "assets/Switch.png",
                       "Availability",
-                      LecturerAvailabilityPage(),
+                      LecturerAvailabilityPage(lecturerUid: lecturerUid), // Pass lecturerUid here
                     ),
                     _buildActionButton(
                       context,
@@ -99,18 +98,16 @@ class LecturerHomePage extends StatelessWidget {
                       context,
                       "assets/inbox.png",
                       "Inbox",
-                      LecturerInbox(),
-                    ), // Updated to navigate to ViewBookingsPage
+                      LecturerInbox(lecturerUid: lecturerUid), // Pass lecturerUid here
+                    ),
                   ],
                 ),
-                SizedBox(height: 20),
-
-                // Latest News Section
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   "LATEST NEWS",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
@@ -120,9 +117,7 @@ class LecturerHomePage extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(height: 20),
-
-                // Bottom Buttons: Contact Us & About Us
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -137,7 +132,7 @@ class LecturerHomePage extends StatelessWidget {
                       "assets/about.png",
                       "About Us",
                       AboutUsPage(),
-                    ), // ✅ Navigates to About Us Page
+                    ),
                   ],
                 ),
               ],

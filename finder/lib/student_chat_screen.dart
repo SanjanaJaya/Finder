@@ -34,14 +34,15 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
       _studentId = user.uid;
 
       // No need to fetch lecturerId here as it's passed from LecturerDetailPage
-      var query = await _firestore
-          .collection('Lecturer')
-          .where('Email', isEqualTo: widget.lecturerEmail)
-          .get();
+      var query =
+          await _firestore
+              .collection('Lecturer')
+              .where('Email', isEqualTo: widget.lecturerEmail)
+              .get();
       if (query.docs.isNotEmpty) {
         setState(() {
           _lecturerName =
-          "${query.docs.first['L_First_Name']} ${query.docs.first['L_Last_Name']}";
+              "${query.docs.first['L_First_Name']} ${query.docs.first['L_Last_Name']}";
         });
       }
     } catch (e) {
@@ -70,17 +71,22 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            _lecturerName != null ? "Chat with $_lecturerName" : "Chat"),
+          _lecturerName != null ? "Chat with $_lecturerName" : "Chat",
+        ),
         backgroundColor: Colors.blue,
       ),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: _firestore
-                  .collection('messages')
-                  .where('receiverId', isEqualTo: widget.lecturerId) // Filter messages by lecturerId
-                  .snapshots(),
+              stream:
+                  _firestore
+                      .collection('messages')
+                      .where(
+                        'receiverId',
+                        isEqualTo: widget.lecturerId,
+                      ) // Filter messages by lecturerId
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
@@ -93,8 +99,12 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
 
                 // Sort messages by timestamp in descending order
                 messages.sort((a, b) {
-                  Timestamp timestampA = a.data()?['timestamp'] ?? Timestamp.fromMillisecondsSinceEpoch(0);
-                  Timestamp timestampB = b.data()?['timestamp'] ?? Timestamp.fromMillisecondsSinceEpoch(0);
+                  Timestamp timestampA =
+                      a.data()?['timestamp'] ??
+                      Timestamp.fromMillisecondsSinceEpoch(0);
+                  Timestamp timestampB =
+                      b.data()?['timestamp'] ??
+                      Timestamp.fromMillisecondsSinceEpoch(0);
                   return timestampB.compareTo(timestampA);
                 });
 
@@ -106,18 +116,21 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
 
                     if (message == null) {
                       return const ListTile(
-                          title: Text("Error: Message data is missing."));
+                        title: Text("Error: Message data is missing."),
+                      );
                     }
 
                     bool isMe = message['senderId'] == _studentId;
 
                     return Align(
                       alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
+                          isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         margin: const EdgeInsets.symmetric(
-                            vertical: 5, horizontal: 10),
+                          vertical: 5,
+                          horizontal: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: isMe ? Colors.blue : Colors.grey[300],
                           borderRadius: BorderRadius.circular(10),
@@ -125,7 +138,8 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
                         child: Text(
                           message['message'],
                           style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black),
+                            color: isMe ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     );

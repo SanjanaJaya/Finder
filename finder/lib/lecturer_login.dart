@@ -18,6 +18,11 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
+    if (email.isEmpty || password.isEmpty) {
+      _showError("Please fill in all fields.");
+      return;
+    }
+
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -25,14 +30,25 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
       );
 
       if (userCredential.user != null) {
-        String lecturerUid = userCredential.user!.uid;
+        // Fetch lecturer data from Firestore using the email
+        QuerySnapshot lecturerQuery =
+            await _firestore
+                .collection('Lecturer')
+                .where('Email', isEqualTo: email)
+                .get();
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LecturerHomePage(lecturerUid: lecturerUid),
-          ),
-        );
+        if (lecturerQuery.docs.isNotEmpty) {
+          String lecturerUid =
+              lecturerQuery.docs.first.id; // Use the document ID as UID
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LecturerHomePage(lecturerUid: lecturerUid),
+            ),
+          );
+        } else {
+          _showError("Lecturer not found in the database.");
+        }
       } else {
         _showError("Invalid email or password.");
       }
@@ -42,7 +58,9 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -56,10 +74,7 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/NSBM_logo.png',
-                height: 120,
-              ),
+              Image.asset('assets/NSBM_logo.png', height: 120),
               const SizedBox(height: 30),
               _buildTextField("Lecturer’s E-mail", false),
               const SizedBox(height: 15),
@@ -86,7 +101,10 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 50,
+                    vertical: 12,
+                  ),
                 ),
                 child: const Text(
                   "Login",
@@ -116,7 +134,10 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
           borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 12,
+        ),
       ),
     );
   }

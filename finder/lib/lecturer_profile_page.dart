@@ -1,6 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class LecturerProfilePage extends StatelessWidget {
+class LecturerProfilePage extends StatefulWidget {
+  final String lecturerUid;
+
+  const LecturerProfilePage({Key? key, required this.lecturerUid})
+    : super(key: key);
+
+  @override
+  _LecturerProfilePageState createState() => _LecturerProfilePageState();
+}
+
+class _LecturerProfilePageState extends State<LecturerProfilePage> {
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? jobRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLecturerData();
+  }
+
+  Future<void> _fetchLecturerData() async {
+    try {
+      DocumentSnapshot lecturerDoc =
+          await FirebaseFirestore.instance
+              .collection('Lecturer')
+              .doc(widget.lecturerUid)
+              .get();
+
+      if (lecturerDoc.exists) {
+        setState(() {
+          firstName = lecturerDoc['L_First_Name'];
+          lastName = lecturerDoc['L_Last_Name'];
+          email = lecturerDoc['Email'];
+          jobRole = lecturerDoc['Job_Role'];
+        });
+      }
+    } catch (e) {
+      print("Error fetching lecturer data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,8 +60,11 @@ class LecturerProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 20),
             Text(
-              'Prof.Chaminda Rathnayake',
+              firstName != null && lastName != null
+                  ? '$firstName $lastName'
+                  : 'Loading...',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -33,9 +79,11 @@ class LecturerProfilePage extends StatelessWidget {
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(20),
               ),
+              child: Icon(Icons.person, size: 60, color: Colors.white),
             ),
             SizedBox(height: 20),
-            ProfileInfoCard('Deputy Vice Chancellor / Associate Professor'),
+            if (email != null) ProfileInfoCard('Email: $email'),
+            if (jobRole != null) ProfileInfoCard('Job Role: $jobRole'),
           ],
         ),
       ),

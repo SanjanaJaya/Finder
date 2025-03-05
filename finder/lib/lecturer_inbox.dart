@@ -1,148 +1,137 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'lec_chat_screen.dart';
 
-class LecturerInbox extends StatefulWidget {
-  final String lecturerUid;
+class LecturerInboxScreen extends StatefulWidget {
+  final String lecturerUid; // Receive lecturerUid here
 
-  const LecturerInbox({Key? key, required this.lecturerUid}) : super(key: key);
+  const LecturerInboxScreen({Key? key, required this.lecturerUid})
+    : super(key: key);
 
   @override
-  _LecturerInboxState createState() => _LecturerInboxState();
+  _LecturerInboxScreenState createState() => _LecturerInboxScreenState();
 }
 
-class _LecturerInboxState extends State<LecturerInbox> {
+class _LecturerInboxScreenState extends State<LecturerInboxScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late String _lecturerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _lecturerId = widget.lecturerUid; // Use lecturerUid passed to the screen
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0E9DD),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Inbox",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _firestore
-              .collection('Messages')
-              .where('lecturerUid', isEqualTo: widget.lecturerUid) // Use lecturerUid
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      appBar: AppBar(title: const Text("Inbox"), backgroundColor: Colors.blue),
+      body: StreamBuilder<QuerySnapshot>(
+        stream:
+            _firestore
+                .collection('messages')
+                .where('receiverId', isEqualTo: _lecturerId)
+                .snapshots(),
+        builder: (context, messageSnapshot) {
+          if (messageSnapshot.hasError) {
+            return const Center(child: Text("Error loading messages."));
+          }
 
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            }
+          if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
+            return const Center(child: Text("No messages received."));
+          }
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No messages available."));
-            }
+          // Log to check the messages being fetched
+          print('Fetched messages: ${messageSnapshot.data!.docs.length}');
 
-            final messages = snapshot.data!.docs;
+          // Get the student IDs who sent messages
+          Set<String> studentIds = Set();
+          messageSnapshot.data!.docs.forEach((doc) {
+            studentIds.add(doc['senderId']);
+            print('Message from senderId: ${doc['senderId']}');
+          });
 
-            return ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final messageData =
-                messages[index].data() as Map<String, dynamic>;
-                final studentId = messageData['studentId'] ?? '';
-                final message = messageData['message'] ?? '';
+          return StreamBuilder<QuerySnapshot>(
+            stream:
+                _firestore
+                    .collection('Person')
+                    .where(FieldPath.documentId, whereIn: studentIds.toList())
+                    .snapshots(),
+            builder: (context, studentSnapshot) {
+              if (studentSnapshot.hasError) {
+                return const Center(child: Text("Error loading students."));
+              }
 
-                return FutureBuilder<DocumentSnapshot>(
-                  future: _firestore.collection('Person').doc(studentId).get(),
-                  builder: (context, studentSnapshot) {
-                    if (studentSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return const Center(
-                          child: CircularProgressIndicator());
-                    }
+              if (!studentSnapshot.hasData ||
+                  studentSnapshot.data!.docs.isEmpty) {
+                return const Center(child: Text("No students found."));
+              }
 
-                    if (studentSnapshot.hasError) {
-                      return ListTile(title: Text("Error: ${studentSnapshot.error}"));
-                    }
+              List<DocumentSnapshot> students = studentSnapshot.data!.docs;
 
-                    if (!studentSnapshot.hasData) {
-                      return const ListTile(
-                          title: Text("Error: Student data not found."));
-                    }
+              return ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (context, index) {
+                  var studentData = students[index];
+                  String studentId = studentData.id;
+                  String studentEmail = studentData['Email'];
+                  String studentName =
+                      "${studentData['First_Name']} ${studentData['Last_Name']}";
 
-                    final studentData = studentSnapshot.data!.data()
-                    as Map<String, dynamic>;
-                    final studentName =
-                        "${studentData['First_Name']} ${studentData['Last_Name']}";
-                    final studentEmail = studentData['Email'];
+                  // Log student details
+                  print('Student found: $studentName with ID: $studentId');
 
-                    return Card(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.black,
-                          child: Text(
-                            studentName[0],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          studentName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
-                          message,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.black54,
-                          size: 18,
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LecturerChatScreen(
+                  // Find the most recent message sent by the student
+                  String latestMessage = "No messages yet.";
+                  var studentMessages =
+                      messageSnapshot.data!.docs
+                          .where(
+                            (doc) =>
+                                doc['senderId'] == studentId &&
+                                doc['receiverId'] == _lecturerId,
+                          )
+                          .toList();
+                  if (studentMessages.isNotEmpty) {
+                    studentMessages.sort((a, b) {
+                      // Ensure that the timestamp is not null before comparing
+                      Timestamp? timestampA = a['timestamp'] as Timestamp?;
+                      Timestamp? timestampB = b['timestamp'] as Timestamp?;
+
+                      if (timestampA == null || timestampB == null) {
+                        return 0; // Return 0 if either timestamp is null
+                      }
+
+                      return timestampB.compareTo(timestampA);
+                    });
+                    latestMessage = studentMessages.first['message'];
+                  }
+
+                  // Log the latest message
+                  print('Latest message for $studentName: $latestMessage');
+
+                  return ListTile(
+                    title: Text(studentName),
+                    subtitle: Text(latestMessage),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => LecturerChatScreen(
                                 studentEmail: studentEmail,
                                 studentId: studentId,
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          },
-        ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }

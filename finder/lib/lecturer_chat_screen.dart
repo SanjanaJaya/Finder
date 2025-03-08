@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LecturerChatScreen extends StatefulWidget {
-  final String senderId; // Student's UID
-  final String receiverId; // Lecturer's UID
+  final String senderId;
+  final String receiverId;
 
   const LecturerChatScreen({
     Key? key,
@@ -20,17 +20,44 @@ class _LecturerChatScreenState extends State<LecturerChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String senderName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSenderName();
+  }
+
+  void _fetchSenderName() async {
+    DocumentSnapshot senderSnapshot =
+        await _firestore.collection('Person').doc(widget.senderId).get();
+    if (senderSnapshot.exists) {
+      setState(() {
+        senderName =
+            "${senderSnapshot['First_Name']} ${senderSnapshot['Last_Name']}";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF3EBDD),
       appBar: AppBar(
-        title: Text('Chat with Student'),
-        backgroundColor: Colors.black,
+        backgroundColor: Color(0xFFF3EBDD),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          senderName.isNotEmpty ? senderName : "Chat",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          // Display messages
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:
@@ -50,33 +77,31 @@ class _LecturerChatScreenState extends State<LecturerChatScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(child: Text('No messages yet.'));
                 }
 
                 return ListView.builder(
+                  padding: EdgeInsets.all(16),
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     var message = snapshot.data!.docs[index];
                     bool isMe = message['senderId'] == _auth.currentUser!.uid;
-
                     return Align(
                       alignment:
                           isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
-                        margin: EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 8,
+                        margin: EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 14,
                         ),
-                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isMe ? Colors.blue : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12),
+                          color: isMe ? Colors.black : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           message['message'],
@@ -92,19 +117,18 @@ class _LecturerChatScreenState extends State<LecturerChatScreen> {
             ),
           ),
 
-          // Message input field and send button
+          // Message input field
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      hintText: 'Type Your Message Here',
+                      hintStyle: TextStyle(color: Colors.black),
+                      border: InputBorder.none,
                     ),
                   ),
                 ),
@@ -120,13 +144,12 @@ class _LecturerChatScreenState extends State<LecturerChatScreen> {
     );
   }
 
-  // Function to send a message
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
     await _firestore.collection('Messages').add({
-      'senderId': _auth.currentUser!.uid, // Lecturer's UID
-      'receiverId': widget.senderId, // Student's UID
+      'senderId': _auth.currentUser!.uid,
+      'receiverId': widget.senderId,
       'message': _messageController.text.trim(),
       'timestamp': DateTime.now(),
     });

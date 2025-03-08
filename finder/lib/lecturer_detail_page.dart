@@ -3,7 +3,7 @@ import 'student_chat_screen.dart';
 
 class LecturerDetailPage extends StatelessWidget {
   final Map<String, dynamic> lecturer;
-  final String studentUid; // Pass the student's UID
+  final String studentUid;
 
   LecturerDetailPage({required this.lecturer, required this.studentUid});
 
@@ -35,7 +35,7 @@ class LecturerDetailPage extends StatelessWidget {
               radius: 50,
               backgroundImage: AssetImage(
                 'assets/profile_placeholder.png',
-              ), // Update as needed
+              ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -44,21 +44,21 @@ class LecturerDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              lecturer['Job_Role'],
+              lecturer['Job_Role'] ?? "Unknown role",
               style: TextStyle(fontSize: 16, color: Colors.grey[700]),
             ),
             const SizedBox(height: 20),
             ListTile(
               leading: const Icon(Icons.email),
-              title: Text(lecturer['Email']),
+              title: Text(lecturer['Email'] ?? "No email available"),
             ),
             ListTile(
               leading: const Icon(Icons.phone),
-              title: Text(lecturer['Contact No']),
+              title: Text(lecturer['Contact No'] ?? "No contact available"),
             ),
             ListTile(
               leading: const Icon(Icons.business),
-              title: Text(lecturer['Faculty_Name']),
+              title: Text(lecturer['Faculty_Name'] ?? "No faculty info"),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -87,18 +87,16 @@ class LecturerDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                // Ensure lecturer contains 'Email' and 'uid'
-                if (lecturer.containsKey('Email') &&
-                    lecturer.containsKey('uid')) {
+                if (lecturer.containsKey('uid')) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (context) => StudentChatScreen(
-                            lecturerEmail: lecturer['Email'],
-                            lecturerId: lecturer['uid'],
-                            studentUid: studentUid, // Pass student's UID
-                          ),
+                      builder: (context) => StudentChatScreen(
+                        lecturerId: lecturer['uid'],
+                        studentUid: studentUid,
+                        lecturerFirstName: lecturer['L_First_Name'] ?? '',
+                        lecturerLastName: lecturer['L_Last_Name'] ?? '',
+                      ),
                     ),
                   );
                 } else {

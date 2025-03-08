@@ -16,7 +16,24 @@ class _LecturerInboxScreenState extends State<LecturerInboxScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Inbox')),
+      backgroundColor: Color(0xFFF3E8DC), // Light beige background
+      appBar: AppBar(
+        backgroundColor: Color(0xFFF3E8DC),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Inbox',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream:
             FirebaseFirestore.instance
@@ -63,7 +80,7 @@ class _LecturerInboxScreenState extends State<LecturerInboxScreen> {
                 builder: (context, studentSnapshot) {
                   if (studentSnapshot.connectionState ==
                       ConnectionState.waiting) {
-                    return ListTile(title: Text("Loading..."));
+                    return SizedBox.shrink(); // Hide loading items
                   }
 
                   if (studentSnapshot.hasError || !studentSnapshot.hasData) {
@@ -74,9 +91,10 @@ class _LecturerInboxScreenState extends State<LecturerInboxScreen> {
                   String lastName = studentSnapshot.data!['Last_Name'] ?? '';
                   String studentName = '$firstName $lastName';
 
-                  return ListTile(
-                    title: Text(studentName),
-                    subtitle: Text("Messages: ${messages.length}"),
+                  // Get the latest message
+                  String latestMessage = messages.first['message'];
+
+                  return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -89,6 +107,60 @@ class _LecturerInboxScreenState extends State<LecturerInboxScreen> {
                         ),
                       );
                     },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.black,
+                            child: Text(
+                              firstName.isNotEmpty ? firstName[0] : '?',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  studentName,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  latestMessage,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               );

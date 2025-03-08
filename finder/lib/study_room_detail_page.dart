@@ -94,58 +94,105 @@ class StudyRoomDetailPage extends StatelessWidget {
         title: Text(studyRoom['Name'], style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
         centerTitle: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Floor: ${studyRoom['Floor']}', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 10),
-            Text('Location: ${studyRoom['Location']}', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 10),
-            Text(
-              'Status: ${studyRoom['isBooked'] ? 'Booked' : 'Available'}',
-              style: TextStyle(
-                fontSize: 18,
-                color: studyRoom['isBooked'] ? Colors.red : Colors.green,
-              ),
-            ),
-            SizedBox(height: 10),
-            if (studyRoom['isBooked'])
-              FutureBuilder<String>(
-                future: _fetchBookerName(studyRoom['bookedBy']),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text('Loading booker details...', style: TextStyle(fontSize: 18));
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}', style: TextStyle(fontSize: 18));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Booked By: Unknown User', style: TextStyle(fontSize: 18));
-                  } else {
-                    return Text('Booked By: ${snapshot.data!}', style: TextStyle(fontSize: 18));
-                  }
-                },
-              ),
-            SizedBox(height: 20),
-            if (!studyRoom['isBooked'])
-              Center(
-                child: ElevatedButton(
-                  onPressed: () => _bookStudyRoom(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffa9c6a8), // Greenish button
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          studyRoom['Name'],
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        _buildDetailRow('Floor', studyRoom['Floor']),
+                        _buildDetailRow('Location', studyRoom['Location']),
+                        _buildDetailRow(
+                          'Status',
+                          studyRoom['isBooked'] ? 'Booked' : 'Available',
+                          textColor: studyRoom['isBooked'] ? Colors.red : Colors.green,
+                        ),
+                        if (studyRoom['isBooked'])
+                          FutureBuilder<String>(
+                            future: _fetchBookerName(studyRoom['bookedBy']),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return _buildDetailRow('Booked By', 'Loading...');
+                              } else if (snapshot.hasError) {
+                                return _buildDetailRow('Booked By', 'Error: ${snapshot.error}');
+                              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return _buildDetailRow('Booked By', 'Unknown User');
+                              } else {
+                                return _buildDetailRow('Booked By', snapshot.data!);
+                              }
+                            },
+                          ),
+                      ],
                     ),
                   ),
-                  child: Text(
-                    'Book This Room',
-                    style: TextStyle(fontSize: 18, color: Colors.black),
-                  ),
                 ),
-              ),
-          ],
+                SizedBox(height: 20),
+                if (!studyRoom['isBooked'])
+                  ElevatedButton(
+                    onPressed: () => _bookStudyRoom(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xffa9c6a8), // Greenish button
+                      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      'Book This Room',
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  // Helper function to build a detail row
+  Widget _buildDetailRow(String label, String value, {Color textColor = Colors.black}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              color: textColor,
+            ),
+          ),
+        ],
       ),
     );
   }

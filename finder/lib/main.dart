@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'lecturer_list.dart'; // Lecturer List Page
+import 'lecturer_list_page.dart'; // Lecturer List Page
 import 'study_room_list.dart'; // Study Room List Page
 import 'contact_us.dart'; // Contact Us Page
 import 'about_us.dart'; // About Us Page ✅
 import 'view_bookings.dart'; // Import the View Bookings Page
 import 'student_profile_page.dart'; // Import the Student Profile Page
-import 'lecturer_home.dart'; // Import Lecturer Home Page
 import 'opening_page.dart'; // Opening page for the app
 
 void main() async {
@@ -24,7 +23,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(), // Listen to Firebase authentication state changes
+        stream:
+            FirebaseAuth.instance
+                .authStateChanges(), // Listen to Firebase authentication state changes
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -83,7 +84,10 @@ class HomePage extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: Icon(Icons.arrow_back, size: 30),
-                          onPressed: () => _logout(context), // Logout on back arrow press
+                          onPressed:
+                              () => _logout(
+                                context,
+                              ), // Logout on back arrow press
                         ),
                         SizedBox(width: 15),
                         GestureDetector(
@@ -139,7 +143,10 @@ class HomePage extends StatelessWidget {
                       context,
                       "assets/location.png",
                       "Meet Your\nLecturer",
-                      LecturerListPage(),
+                      LecturerListPage(
+                        studentUid:
+                            FirebaseAuth.instance.currentUser?.uid ?? "",
+                      ), // Pass the studentUid here
                     ),
                     _buildActionButton(
                       context,
@@ -202,19 +209,14 @@ class HomePage extends StatelessWidget {
 
   // 🔹 Quick Action Button Widget (Supports Navigation)
   Widget _buildActionButton(
-      BuildContext context,
-      String iconPath,
-      String label,
-      Widget? page,
-      ) {
+    BuildContext context,
+    String iconPath,
+    String label,
+    Widget page,
+  ) {
     return GestureDetector(
       onTap: () {
-        if (page != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        }
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
       child: Column(
         children: [
@@ -241,19 +243,14 @@ class HomePage extends StatelessWidget {
 
   // 🔹 Bottom Button Widget (Supports Navigation)
   Widget _buildBottomButton(
-      BuildContext context,
-      String iconPath,
-      String label,
-      Widget? page,
-      ) {
+    BuildContext context,
+    String iconPath,
+    String label,
+    Widget page,
+  ) {
     return GestureDetector(
       onTap: () {
-        if (page != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        }
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
       child: Container(
         width: 170,

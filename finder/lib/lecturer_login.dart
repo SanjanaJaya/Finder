@@ -32,14 +32,15 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
       if (userCredential.user != null) {
         // Fetch lecturer data from Firestore using the email
         QuerySnapshot lecturerQuery =
-            await _firestore
-                .collection('Lecturer')
-                .where('Email', isEqualTo: email)
-                .get();
+        await _firestore
+            .collection('Lecturer')
+            .where('Email', isEqualTo: email)
+            .get();
 
         if (lecturerQuery.docs.isNotEmpty) {
-          String lecturerUid =
-              lecturerQuery.docs.first.id; // Use the document ID as UID
+          // Fetch the lecturer's UID from the 'uid' field
+          String lecturerUid = lecturerQuery.docs.first['uid']; // Use the 'uid' field
+          print("Lecturer UID: $lecturerUid"); // Debugging: Print the lecturer UID
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -58,9 +59,7 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override

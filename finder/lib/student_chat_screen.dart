@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentChatScreen extends StatefulWidget {
   final String lecturerEmail;
   final String lecturerId;
+  final String studentUid;
 
-  StudentChatScreen({required this.lecturerEmail, required this.lecturerId});
+  StudentChatScreen({
+    required this.lecturerEmail,
+    required this.lecturerId,
+    required this.studentUid,
+  });
 
   @override
   _StudentChatScreenState createState() => _StudentChatScreenState();
@@ -14,126 +18,110 @@ class StudentChatScreen extends StatefulWidget {
 
 class _StudentChatScreenState extends State<StudentChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  String? _lecturerName;
-  String? _studentId;
+  int _sentMessages = 0; // Track sent messages
 
   @override
   void initState() {
     super.initState();
-    fetchUserDetails();
+    _checkSentMessages(); // Check message count on load
   }
 
-  Future<void> fetchUserDetails() async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) return;
+  // Check how many messages the student has sent
+  Future<void> _checkSentMessages() async {
+    QuerySnapshot sentMessages =
+        await FirebaseFirestore.instance
+            .collection('Messages')
+            .where('senderId', isEqualTo: widget.studentUid)
+            .where('receiverId', isEqualTo: widget.lecturerId)
+            .get();
 
-      _studentId = user.uid;
-
-      // No need to fetch lecturerId here as it's passed from LecturerDetailPage
-      var query =
-          await _firestore
-              .collection('Lecturer')
-              .where('Email', isEqualTo: widget.lecturerEmail)
-              .get();
-      if (query.docs.isNotEmpty) {
-        setState(() {
-          _lecturerName =
-              "${query.docs.first['L_First_Name']} ${query.docs.first['L_Last_Name']}";
-        });
-      }
-    } catch (e) {
-      print("Error fetching user details: $e");
-    }
+    setState(() {
+      _sentMessages = sentMessages.docs.length;
+    });
   }
 
-  void sendMessage() async {
-    if (_messageController.text.trim().isEmpty || _studentId == null) return;
-
-    try {
-      await _firestore.collection('messages').add({
-        'senderId': _studentId,
-        'receiverId': widget.lecturerId, // Use the passed lecturerId
-        'message': _messageController.text.trim(),
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      _messageController.clear();
-    } catch (e) {
-      print("Error sending message: $e");
+  // Send message function
+  Future<void> _sendMessage() async {
+    if (_sentMessages >= 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Message limit reached (4 messages).")),
+      );
+      return;
     }
+
+    String message = _messageController.text.trim();
+    if (message.isEmpty) return;
+
+    await FirebaseFirestore.instance.collection('Messages').add({
+      'senderId': widget.studentUid,
+      'receiverId': widget.lecturerId,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    setState(() {
+      _sentMessages++;
+    });
+
+    _messageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _lecturerName != null ? "Chat with $_lecturerName" : "Chat",
-        ),
-        backgroundColor: Colors.blue,
-      ),
+      appBar: AppBar(title: Text("Chat with ${widget.lecturerEmail}")),
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            child: StreamBuilder<QuerySnapshot>(
               stream:
-                  _firestore
-                      .collection('messages')
+                  FirebaseFirestore.instance
+                      .collection('Messages')
+                      .where(
+                        'senderId',
+                        whereIn: [widget.studentUid, widget.lecturerId],
+                      )
                       .where(
                         'receiverId',
-                        isEqualTo: widget.lecturerId,
-                      ) // Filter messages by lecturerId
+                        whereIn: [widget.studentUid, widget.lecturerId],
+                      )
+                      .orderBy('timestamp', descending: true)
                       .snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("No messages yet."));
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
                 }
 
                 var messages = snapshot.data!.docs;
-
-                // Sort messages by timestamp in descending order
-                messages.sort((a, b) {
-                  Timestamp timestampA =
-                      a.data()?['timestamp'] ??
-                      Timestamp.fromMillisecondsSinceEpoch(0);
-                  Timestamp timestampB =
-                      b.data()?['timestamp'] ??
-                      Timestamp.fromMillisecondsSinceEpoch(0);
-                  return timestampB.compareTo(timestampA);
-                });
 
                 return ListView.builder(
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    var message = messages[index].data();
+                    var message =
+                        messages[index].data() as Map<String, dynamic>;
 
-                    if (message == null) {
-                      return const ListTile(
-                        title: Text("Error: Message data is missing."),
-                      );
-                    }
+                    // Safely handle null timestamp
+                    var timestamp =
+                        message['timestamp'] != null
+                            ? (message['timestamp'] as Timestamp).toDate()
+                            : DateTime.now();
 
-                    bool isMe = message['senderId'] == _studentId;
+                    // Check if the message is from the student or lecturer
+                    bool isMe = message['senderId'] == widget.studentUid;
 
                     return Align(
                       alignment:
                           isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.symmetric(
-                          vertical: 5,
-                          horizontal: 10,
+                        margin: EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 8,
                         ),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isMe ? Colors.blue : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           message['message'],
@@ -156,18 +144,12 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: "Type a message...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      hintText: "Enter your message...",
                     ),
+                    enabled: _sentMessages < 4, // Disable if limit reached
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.blue),
-                  onPressed: sendMessage,
-                ),
+                IconButton(icon: Icon(Icons.send), onPressed: _sendMessage),
               ],
             ),
           ),

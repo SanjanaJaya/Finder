@@ -3,8 +3,9 @@ import 'student_chat_screen.dart';
 
 class LecturerDetailPage extends StatelessWidget {
   final Map<String, dynamic> lecturer;
+  final String studentUid; // Pass the student's UID
 
-  LecturerDetailPage({required this.lecturer});
+  LecturerDetailPage({required this.lecturer, required this.studentUid});
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +33,9 @@ class LecturerDetailPage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage:
-              AssetImage('assets/profile_placeholder.png'), // Change as needed
+              backgroundImage: AssetImage(
+                'assets/profile_placeholder.png',
+              ), // Update as needed
             ),
             const SizedBox(height: 10),
             Text(
@@ -85,16 +87,25 @@ class LecturerDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                // Navigate to StudentChatScreen with Lecturer's Email and uid
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentChatScreen(
-                      lecturerEmail: lecturer['Email'],
-                      lecturerId: lecturer['uid'],
+                // Ensure lecturer contains 'Email' and 'uid'
+                if (lecturer.containsKey('Email') &&
+                    lecturer.containsKey('uid')) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => StudentChatScreen(
+                            lecturerEmail: lecturer['Email'],
+                            lecturerId: lecturer['uid'],
+                            studentUid: studentUid, // Pass student's UID
+                          ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Lecturer details are missing!")),
+                  );
+                }
               },
               icon: const Icon(Icons.chat, color: Colors.white),
               label: const Text("Chat with Lecturer"),

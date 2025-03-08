@@ -15,6 +15,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
   String faculty = "";
   String email = "";
   String degree = "";
+  String imageUrl = ""; // Add this variable to store the image URL
 
   bool isLoading = true;
   String errorMessage = "";
@@ -63,6 +64,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           faculty = userData['Faculty'] ?? "Unknown";
           email = userData['Email'] ?? "Unknown";
           degree = userData['Degree'] ?? "Unknown";
+          imageUrl = userData['Image'] ?? ""; // Fetch the image URL
           isLoading = false;
           errorMessage = "";
         });
@@ -136,14 +138,28 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                 ),
               ),
               SizedBox(height: 20),
+              // Display the student's image with a larger size
               Container(
-                width: 120,
-                height: 120,
+                width: 200, // Increased width
+                height: 200, // Increased height
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(100), // Circular shape
                 ),
-                child: Icon(Icons.person, size: 80, color: Colors.black54),
+                child: imageUrl.isNotEmpty
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(100), // Circular shape
+                  child: Image.network(
+                    imageUrl,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.error, size: 80, color: Colors.red); // Fallback for errors
+                    },
+                  ),
+                )
+                    : Icon(Icons.person, size: 120, color: Colors.black54), // Larger fallback icon
               ),
               SizedBox(height: 20),
               ProfileInfoCard('Student ID: $id'),

@@ -13,8 +13,10 @@ class LecturerListPage extends StatefulWidget {
 
 class _LecturerListPageState extends State<LecturerListPage> {
   List<Map<String, dynamic>> lecturers = [];
+  List<Map<String, dynamic>> filteredLecturers = []; // For filtered results
   bool isLoading = true;
   String errorMessage = "";
+  TextEditingController searchController = TextEditingController(); // Search controller
 
   @override
   void initState() {
@@ -26,13 +28,14 @@ class _LecturerListPageState extends State<LecturerListPage> {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       QuerySnapshot querySnapshot =
-          await firestore.collection('Lecturer').get();
+      await firestore.collection('Lecturer').get();
 
       setState(() {
         lecturers =
             querySnapshot.docs
                 .map((doc) => doc.data() as Map<String, dynamic>)
                 .toList();
+        filteredLecturers = List.from(lecturers); // Initialize filtered list
         isLoading = false;
         errorMessage = "";
       });
@@ -43,6 +46,21 @@ class _LecturerListPageState extends State<LecturerListPage> {
         errorMessage = "Error loading lecturer data: $e";
       });
     }
+  }
+
+  // Function to filter lecturers based on search query
+  void filterLecturers(String query) {
+    setState(() {
+      filteredLecturers = lecturers
+          .where((lecturer) =>
+      lecturer['L_First_Name']
+          .toLowerCase()
+          .contains(query.toLowerCase()) ||
+          lecturer['L_Last_Name']
+              .toLowerCase()
+              .contains(query.toLowerCase()))
+          .toList();
+    });
   }
 
   @override
@@ -63,6 +81,7 @@ class _LecturerListPageState extends State<LecturerListPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
+            // Search Bar
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -76,6 +95,7 @@ class _LecturerListPageState extends State<LecturerListPage> {
                 ],
               ),
               child: TextField(
+                controller: searchController,
                 decoration: InputDecoration(
                   hintText: "Search Your Lecturer",
                   border: InputBorder.none,
@@ -85,55 +105,64 @@ class _LecturerListPageState extends State<LecturerListPage> {
                   ),
                   suffixIcon: Icon(Icons.search, color: Colors.black),
                 ),
+                onChanged: (value) {
+                  filterLecturers(value); // Filter lecturers as user types
+                },
               ),
             ),
             SizedBox(height: 20),
             Expanded(
-              child:
-                  isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : errorMessage.isNotEmpty
-                      ? Center(
-                        child: Text(
-                          errorMessage,
-                          style: TextStyle(color: Colors.red),
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : errorMessage.isNotEmpty
+                  ? Center(
+                child: Text(
+                  errorMessage,
+                  style: TextStyle(color: Colors.red),
+                ),
+              )
+                  : filteredLecturers.isEmpty
+                  ? Center(
+                child: Text(
+                  "No lecturers found.",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              )
+                  : ListView.builder(
+                itemCount: filteredLecturers.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: ListTile(
+                      title: Text(
+                        "${filteredLecturers[index]['L_First_Name']} ${filteredLecturers[index]['L_Last_Name']}",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                      )
-                      : ListView.builder(
-                        itemCount: lecturers.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10.0),
-                            child: ListTile(
-                              title: Text(
-                                "${lecturers[index]['L_First_Name']} ${lecturers[index]['L_Last_Name']}",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              tileColor: Color(0xFFAECBAD),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => LecturerDetailPage(
-                                          lecturer: lecturers[index],
-                                          studentUid:
-                                              widget
-                                                  .studentUid, // Pass Student UID
-                                        ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
                       ),
+                      tileColor: Color(0xFFAECBAD),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LecturerDetailPage(
+                              lecturer: filteredLecturers[index],
+                              studentUid: widget.studentUid, // Pass Student UID
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

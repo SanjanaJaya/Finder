@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
-import 'library_study_rooms.dart'; // Import the new Library study room page
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'study_room_detail_page.dart'; // Import the details page
 
-class StudyRoomListPage extends StatelessWidget {
+// Define fetchStudyRooms function
+Future<List<Map<String, dynamic>>> fetchStudyRooms() async {
+  QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Study_Rooms').get();
+  return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+}
+
+class StudyRoomListPage extends StatefulWidget {
+  @override
+  _StudyRoomListPageState createState() => _StudyRoomListPageState();
+}
+
+class _StudyRoomListPageState extends State<StudyRoomListPage> {
+  final Future<List<Map<String, dynamic>>> studyRoomsFuture = fetchStudyRooms();
+  String searchQuery = ""; // Track the search query
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,22 +35,76 @@ class StudyRoomListPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildRoomCategory(context, "Library", LibraryStudyRoomsPage()), // ✅ Navigates to Library page
-            _buildRoomCategory(context, "FOC B1", null), // Modify for more rooms
+            // Search Bar
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Search study rooms...",
+                prefixIcon: Icon(Icons.search, color: Colors.black),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase(); // Update search query
+                });
+              },
+            ),
+            SizedBox(height: 16), // Spacing between search bar and list
+            // Study Rooms List
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: studyRoomsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No study rooms available.'));
+                  } else {
+                    List<Map<String, dynamic>> studyRooms = snapshot.data!;
+
+                    // Sort study rooms alphabetically by name
+                    studyRooms.sort((a, b) => a['Name'].compareTo(b['Name']));
+
+                    // Filter study rooms based on search query
+                    List<Map<String, dynamic>> filteredRooms = studyRooms
+                        .where((room) =>
+                        room['Name'].toLowerCase().contains(searchQuery))
+                        .toList();
+
+                    return ListView.builder(
+                      itemCount: filteredRooms.length,
+                      itemBuilder: (context, index) {
+                        var studyRoom = filteredRooms[index];
+                        return _buildRoomCategory(context, studyRoom['Name'], studyRoom);
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRoomCategory(BuildContext context, String title, Widget? page) {
+  Widget _buildRoomCategory(BuildContext context, String title, Map<String, dynamic> studyRoom) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: GestureDetector(
         onTap: () {
-          if (page != null) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudyRoomDetailPage(studyRoom: studyRoom),
+            ),
+          );
         },
         child: Container(
           width: double.infinity,

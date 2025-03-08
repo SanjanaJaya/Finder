@@ -12,7 +12,7 @@ class LecturerHomePage extends StatefulWidget {
   final String lecturerUid;
 
   const LecturerHomePage({Key? key, required this.lecturerUid})
-    : super(key: key);
+      : super(key: key);
 
   @override
   _LecturerHomePageState createState() => _LecturerHomePageState();
@@ -20,20 +20,22 @@ class LecturerHomePage extends StatefulWidget {
 
 class _LecturerHomePageState extends State<LecturerHomePage> {
   String? lecturerName;
+  String? lecturerStatus;
 
   @override
   void initState() {
     super.initState();
     _fetchLecturerName();
+    _fetchLecturerStatus();
   }
 
   Future<void> _fetchLecturerName() async {
     try {
       DocumentSnapshot lecturerDoc =
-          await FirebaseFirestore.instance
-              .collection('Lecturer')
-              .doc(widget.lecturerUid)
-              .get();
+      await FirebaseFirestore.instance
+          .collection('Lecturer')
+          .doc(widget.lecturerUid)
+          .get();
 
       if (lecturerDoc.exists) {
         String firstName = lecturerDoc['L_First_Name'] ?? '';
@@ -44,6 +46,46 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
       }
     } catch (e) {
       print("Error fetching lecturer name: $e");
+    }
+  }
+
+  Future<void> _fetchLecturerStatus() async {
+    try {
+      DocumentSnapshot lecturerDoc =
+      await FirebaseFirestore.instance
+          .collection('Lecturer')
+          .doc(widget.lecturerUid)
+          .get();
+
+      if (lecturerDoc.exists) {
+        setState(() {
+          lecturerStatus = lecturerDoc['status'] ?? 'Unknown';
+        });
+      }
+    } catch (e) {
+      print("Error fetching lecturer status: $e");
+    }
+  }
+
+  Future<void> _updateStatus(String status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Lecturer')
+          .doc(widget.lecturerUid)
+          .update({'status': status});
+
+      setState(() {
+        lecturerStatus = status;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Status updated to $status')),
+      );
+    } catch (e) {
+      print("Error updating status: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update status')),
+      );
     }
   }
 
@@ -88,8 +130,8 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                               MaterialPageRoute(
                                 builder:
                                     (context) => LecturerProfilePage(
-                                      lecturerUid: widget.lecturerUid,
-                                    ), // Pass lecturerUid
+                                  lecturerUid: widget.lecturerUid,
+                                ), // Pass lecturerUid
                               ),
                             );
                           },
@@ -141,17 +183,19 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                   child: Column(
                     children: [
                       _availabilityOption(
-                        color: Colors.green,
+                        color: lecturerStatus == 'Inside Cabin' ? Colors.green : Colors.grey,
                         icon: Icons.check_circle,
                         text: 'AVAILABLE',
                         subtitle: 'MY CABIN',
+                        onTap: () => _updateStatus('Inside Cabin'),
                       ),
                       const SizedBox(height: 20),
                       _availabilityOption(
-                        color: Colors.red,
+                        color: lecturerStatus == 'Outside Cabin' ? Colors.red : Colors.grey,
                         icon: Icons.exit_to_app,
                         text: 'OUTSIDE',
                         subtitle: 'OUTSIDE',
+                        onTap: () => _updateStatus('Outside Cabin'),
                       ),
                     ],
                   ),
@@ -201,47 +245,51 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
     required IconData icon,
     required String text,
     required String subtitle,
+    required VoidCallback onTap,
   }) {
-    return Column(
-      children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 5,
-                offset: Offset(2, 2),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 40, color: Colors.white),
-                const SizedBox(height: 5),
-                Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 5,
+                  offset: Offset(2, 2),
                 ),
               ],
             ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 40, color: Colors.white),
+                  const SizedBox(height: 5),
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          subtitle,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
-      ],
+          const SizedBox(height: 5),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'contact_us.dart';
 import 'about_us.dart';
-import 'lecturer_profile_page.dart'; // Ensure this is imported
+import 'lecturer_profile_page.dart';
 import 'lecturers_appointment.dart';
 import 'lecturer_inbox.dart';
-import 'opening_page.dart'; // Import the opening page
+import 'opening_page.dart';
 
 class LecturerHomePage extends StatefulWidget {
   final String lecturerUid;
@@ -21,18 +22,53 @@ class LecturerHomePage extends StatefulWidget {
 class _LecturerHomePageState extends State<LecturerHomePage> {
   String? lecturerName;
   String? lecturerStatus;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
     super.initState();
     _fetchLecturerName();
     _fetchLecturerStatus();
+    _setupFCM();
+  }
+
+  Future<void> _setupFCM() async {
+    // Request permission for notifications (iOS only)
+    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Get the FCM token
+    String? token = await _firebaseMessaging.getToken();
+    print("FCM Token: $token");
+
+    // Save the token to Firestore (to send notifications later)
+    await FirebaseFirestore.instance
+        .collection('Lecturer')
+        .doc(widget.lecturerUid)
+        .update({'fcmToken': token});
+
+    // Handle foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("Foreground message: ${message.notification?.title}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message.notification?.body ?? 'New notification')),
+      );
+    });
+
+    // Handle background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+
+  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    print("Background message: ${message.notification?.title}");
   }
 
   Future<void> _fetchLecturerName() async {
     try {
-      DocumentSnapshot lecturerDoc =
-      await FirebaseFirestore.instance
+      DocumentSnapshot lecturerDoc = await FirebaseFirestore.instance
           .collection('Lecturer')
           .doc(widget.lecturerUid)
           .get();
@@ -51,8 +87,7 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
 
   Future<void> _fetchLecturerStatus() async {
     try {
-      DocumentSnapshot lecturerDoc =
-      await FirebaseFirestore.instance
+      DocumentSnapshot lecturerDoc = await FirebaseFirestore.instance
           .collection('Lecturer')
           .doc(widget.lecturerUid)
           .get();
@@ -91,11 +126,20 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
 
   Future<void> _logout() async {
     try {
+      // Update the lecturer's login status to false
+      await FirebaseFirestore.instance
+          .collection('Lecturer')
+          .doc(widget.lecturerUid)
+          .update({'isLoggedIn': false});
+
+      // Sign out the user
       await FirebaseAuth.instance.signOut();
+
+      // Navigate to the opening page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => OpeningPage(), // Navigate to the opening page
+          builder: (context) => OpeningPage(),
         ),
       );
     } catch (e) {
@@ -110,10 +154,7 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 10.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -128,10 +169,9 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder:
-                                    (context) => LecturerProfilePage(
+                                builder: (context) => LecturerProfilePage(
                                   lecturerUid: widget.lecturerUid,
-                                ), // Pass lecturerUid
+                                ),
                               ),
                             );
                           },
@@ -139,7 +179,7 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                         ),
                         const SizedBox(width: 10),
                         GestureDetector(
-                          onTap: _logout, // Logout functionality
+                          onTap: _logout,
                           child: const Icon(Icons.logout, size: 30),
                         ),
                       ],
@@ -151,27 +191,19 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                   lecturerName != null
                       ? "Good Morning,\n$lecturerName"
                       : "Good Morning,\nLoading...",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 15,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () {
-                      // No navigation needed since availability is now on the home page
-                    },
+                    onPressed: () {},
                     child: const Text(
                       "Select Your Availability Here",
                       style: TextStyle(color: Colors.white),
@@ -257,13 +289,7 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(15),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 5,
-                  offset: Offset(2, 2),
-                ),
-              ],
+              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(2, 2))],
             ),
             child: Center(
               child: Column(
@@ -273,11 +299,7 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                   const SizedBox(height: 5),
                   Text(
                     text,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ],
               ),

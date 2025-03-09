@@ -31,8 +31,7 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
 
       if (userCredential.user != null) {
         // Fetch lecturer data from Firestore using the email
-        QuerySnapshot lecturerQuery =
-        await _firestore
+        QuerySnapshot lecturerQuery = await _firestore
             .collection('Lecturer')
             .where('Email', isEqualTo: email)
             .get();
@@ -41,6 +40,13 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
           // Fetch the lecturer's UID from the 'uid' field
           String lecturerUid = lecturerQuery.docs.first['uid']; // Use the 'uid' field
           print("Lecturer UID: $lecturerUid"); // Debugging: Print the lecturer UID
+
+          // Update the lecturer's login status to true
+          await _firestore
+              .collection('Lecturer')
+              .doc(lecturerUid)
+              .update({'isLoggedIn': true});
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -84,7 +90,7 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
                   // Navigate to Sign Up Page (To be implemented)
                 },
                 child: const Text(
-                  "Don't Have an Account? Create Account",
+                  "",
                   style: TextStyle(
                     fontSize: 14,
                     decoration: TextDecoration.underline,

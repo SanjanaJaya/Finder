@@ -32,6 +32,25 @@ const sendNotification = async () => {
             title: 'Mark Your Availability',
             body: 'Please update your availability for today.',
           },
+          data: {
+            // Add custom data for the notification (e.g., image URL)
+            image: 'https://i.imgur.com/Nw4EixQ.png', // Replace with your image URL
+          },
+          android: {
+            notification: {
+              imageUrl: 'https://i.imgur.com/Nw4EixQ.png', // Android-specific image
+            },
+          },
+          apns: {
+            payload: {
+              aps: {
+                'mutable-content': 1, // Enable mutable content for iOS
+              },
+            },
+            fcm_options: {
+              image: 'https://example.com/path/to/your/image.png', // iOS-specific image
+            },
+          },
           token: fcmToken,
         };
 
@@ -51,9 +70,9 @@ const sendNotification = async () => {
   }
 };
 
-// Schedule the notification to run daily at 9:00 AM
-cron.schedule('0 9 * * *', () => {
-  console.log('Sending daily notifications...');
+// Schedule the notification to run Monday to Friday at 9:00 AM and 5:00 PM
+cron.schedule('0 9,17 * * 1-5', () => {
+  console.log('Sending scheduled notifications...');
   sendNotification();
 });
 
@@ -64,4 +83,4 @@ const testNotification = async () => {
 };
 
 // Uncomment the line below to test notifications manually
-testNotification();
+// testNotification();

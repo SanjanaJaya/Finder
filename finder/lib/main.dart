@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'lecturer_list_page.dart'; // Lecturer List Page
-import 'study_room_list.dart'; // Study Room List Page
-import 'contact_us.dart'; // Contact Us Page
-import 'about_us.dart'; // About Us Page ✅
-import 'view_bookings.dart'; // Import the View Bookings Page
-import 'student_profile_page.dart'; // Import the Student Profile Page
-import 'opening_page.dart'; // Opening page for the app
+import 'package:cloud_firestore/cloud_firestore.dart'; // Add Firestore
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart'; // For SVG support
+import 'lecturer_list_page.dart';
+import 'study_room_list.dart';
+import 'contact_us.dart';
+import 'about_us.dart';
+import 'view_bookings.dart';
+import 'student_profile_page.dart';
+import 'opening_page.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure Firebase is initialized before app runs
-  await Firebase.initializeApp(); // Initialize Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -23,21 +27,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: StreamBuilder<User?>(
-        stream:
-            FirebaseAuth.instance
-                .authStateChanges(), // Listen to Firebase authentication state changes
+        stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
-            ); // Show loading indicator while checking auth state
+            );
           }
 
           if (snapshot.hasData) {
-            // User is logged in, navigate to HomePage
             return HomePage();
           } else {
-            // User is not logged in, show OpeningPage
             return OpeningPage();
           }
         },
@@ -46,10 +46,51 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  // Function to handle logout
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<dynamic> newsItems = [];
+  final PageController _pageController = PageController(viewportFraction: 0.8);
+  Map<String, dynamic>? studentData; // To store student data
+
+  @override
+  void initState() {
+    super.initState();
+    fetchNews();
+    fetchStudentData(); // Fetch student data when the page loads
+  }
+
+  Future<void> fetchNews() async {
+    final response = await http.get(Uri.parse('https://web-scraper-nsbm.onrender.com/'));
+    if (response.statusCode == 200) {
+      setState(() {
+        newsItems = json.decode(response.body);
+      });
+    } else {
+      throw Exception('Failed to load news');
+    }
+  }
+
+  Future<void> fetchStudentData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('Person')
+          .doc(user.uid)
+          .get();
+      if (doc.exists) {
+        setState(() {
+          studentData = doc.data() as Map<String, dynamic>?;
+        });
+      }
+    }
+  }
+
   void _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
@@ -61,42 +102,30 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffeee7da), // Beige Background
+      backgroundColor: Color(0xffeee7da),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 10.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Section: Logo, Back & Profile Icons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset(
-                      "assets/NSBM_logo.png",
-                      width: 130,
-                    ), // University Logo
+                    Image.asset("assets/NSBM_logo.png", width: 130),
                     Row(
                       children: [
                         IconButton(
                           icon: Icon(Icons.arrow_back, size: 30),
-                          onPressed:
-                              () => _logout(
-                                context,
-                              ), // Logout on back arrow press
+                          onPressed: () => _logout(context),
                         ),
                         SizedBox(width: 15),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => StudentProfilePage(),
-                              ),
+                              MaterialPageRoute(builder: (context) => StudentProfilePage()),
                             );
                           },
                           child: Icon(Icons.person, size: 30),
@@ -106,24 +135,24 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 15),
-
-                // Welcome Banner
                 Stack(
                   alignment: Alignment.bottomLeft,
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Image.asset(
-                        "assets/campus.png",
+                        "assets/campus_large.png", // Replace with a larger image
                         width: double.infinity,
-                        height: 150,
+                        height: 200, // Adjust height to fit the screen
                         fit: BoxFit.cover,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        "Good Morning,\nSanjana Jayasooriya",
+                        studentData != null
+                            ? "Welcome,\n${studentData!['First_Name']} ${studentData!['Last_Name']}"
+                            : "Welcome,\nLoading...",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -134,8 +163,6 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 20),
-
-                // Quick Action Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -144,9 +171,8 @@ class HomePage extends StatelessWidget {
                       "assets/location.png",
                       "Meet Your\nLecturer",
                       LecturerListPage(
-                        studentUid:
-                            FirebaseAuth.instance.currentUser?.uid ?? "",
-                      ), // Pass the studentUid here
+                        studentUid: FirebaseAuth.instance.currentUser?.uid ?? "",
+                      ),
                     ),
                     _buildActionButton(
                       context,
@@ -159,29 +185,65 @@ class HomePage extends StatelessWidget {
                       "assets/list.png",
                       "View\nBookings",
                       ViewBookingsPage(),
-                    ), // Updated to navigate to ViewBookingsPage
+                    ),
                   ],
                 ),
                 SizedBox(height: 20),
-
-                // Latest News Section
                 Text(
                   "LATEST NEWS",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    "assets/classroom.png",
-                    width: double.infinity,
-                    height: 180,
-                    fit: BoxFit.cover,
+                newsItems.isEmpty
+                    ? CircularProgressIndicator()
+                    : SizedBox(
+                  height: 180,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: newsItems.length,
+                    itemBuilder: (context, index) {
+                      final item = newsItems[index];
+                      return Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: _buildNewsImage(item['image']), // Handle SVG or fallback
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(20),
+                                      bottomRight: Radius.circular(20),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    item['title'],
+                                    style: TextStyle(fontSize: 16.0, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 SizedBox(height: 20),
-
-                // Bottom Buttons: Contact Us & About Us
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -196,7 +258,7 @@ class HomePage extends StatelessWidget {
                       "assets/about.png",
                       "About Us",
                       AboutUsPage(),
-                    ), // ✅ Navigates to About Us Page
+                    ),
                   ],
                 ),
               ],
@@ -207,13 +269,37 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // 🔹 Quick Action Button Widget (Supports Navigation)
-  Widget _buildActionButton(
-    BuildContext context,
-    String iconPath,
-    String label,
-    Widget page,
-  ) {
+  Widget _buildNewsImage(String imageUrl) {
+    if (imageUrl.startsWith('data:image/svg+xml')) {
+      // Handle SVG data URI
+      return SvgPicture.network(
+        imageUrl,
+        fit: BoxFit.cover, // Make the SVG fill the space
+        placeholderBuilder: (context) => Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    } else {
+      // Handle other image formats (e.g., PNG, JPG)
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover, // Make the image fill the space
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Center(
+            child: Icon(Icons.error, color: Colors.red),
+          );
+        },
+      );
+    }
+  }
+
+  Widget _buildActionButton(BuildContext context, String iconPath, String label, Widget page) {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => page));
@@ -241,13 +327,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // 🔹 Bottom Button Widget (Supports Navigation)
-  Widget _buildBottomButton(
-    BuildContext context,
-    String iconPath,
-    String label,
-    Widget page,
-  ) {
+  Widget _buildBottomButton(BuildContext context, String iconPath, String label, Widget page) {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => page));

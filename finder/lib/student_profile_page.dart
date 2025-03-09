@@ -129,39 +129,55 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Bigger Profile Photo with Rounded Corners and Shadow
+              Container(
+                width: 250, // Increased width
+                height: 250, // Increased height
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: imageUrl.isNotEmpty
+                      ? Image.network(
+                    imageUrl,
+                    width: 250,
+                    height: 250,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.error,
+                        size: 80,
+                        color: Colors.red,
+                      ); // Fallback for errors
+                    },
+                  )
+                      : Icon(
+                    Icons.person,
+                    size: 120,
+                    color: Colors.black54,
+                  ), // Fallback icon
+                ),
+              ),
+              SizedBox(height: 20),
+              // Student Name
               Text(
                 "$firstName $lastName",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
               SizedBox(height: 20),
-              // Display the student's image with a larger size
-              Container(
-                width: 200, // Increased width
-                height: 200, // Increased height
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(100), // Circular shape
-                ),
-                child: imageUrl.isNotEmpty
-                    ? ClipRRect(
-                  borderRadius: BorderRadius.circular(100), // Circular shape
-                  child: Image.network(
-                    imageUrl,
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.error, size: 80, color: Colors.red); // Fallback for errors
-                    },
-                  ),
-                )
-                    : Icon(Icons.person, size: 120, color: Colors.black54), // Larger fallback icon
-              ),
-              SizedBox(height: 20),
+              // Profile Info Cards
               ProfileInfoCard('Student ID: $id'),
               ProfileInfoCard('Intake: $intake'),
               ProfileInfoCard('Faculty: $faculty'),
@@ -182,17 +198,28 @@ class ProfileInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Color(0xFF87A98F),
-          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            colors: [Color(0xFF87A98F), Color(0xFF6C8E7D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
         ),
         child: Text(
           text,
-          style: TextStyle(fontSize: 16, color: Colors.black87),
+          style: TextStyle(fontSize: 16, color: Colors.white),
         ),
       ),
     );

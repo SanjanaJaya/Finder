@@ -20,6 +20,9 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
   String? facultyName;
   String? imageUrl;
 
+  bool isLoading = true;
+  String errorMessage = "";
+
   @override
   void initState() {
     super.initState();
@@ -42,10 +45,19 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
           city = lecturerDoc['City'];
           facultyName = lecturerDoc['Faculty_Name'];
           imageUrl = lecturerDoc['Image'];
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = "Lecturer data not found.";
+          isLoading = false;
         });
       }
     } catch (e) {
-      print("Error fetching lecturer data: $e");
+      setState(() {
+        errorMessage = "Error fetching lecturer data: $e";
+        isLoading = false;
+      });
     }
   }
 
@@ -61,43 +73,72 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Center(
+      body: Center(
+        child: isLoading
+            ? Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text(
+              "Loading Profile...",
+              style: TextStyle(fontSize: 16, color: Colors.black54),
+            ),
+          ],
+        )
+            : errorMessage.isNotEmpty
+            ? Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 60, color: Colors.red),
+            SizedBox(height: 20),
+            Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          ],
+        )
+            : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 20),
-              // Larger Lecturer Image
+              // Bigger Lecturer Image with Rounded Corners and Shadow
               Container(
-                width: 150, // Increased size
-                height: 150, // Increased size
+                width: 250, // Increased size
+                height: 250, // Increased size
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.black87,
-                    width: 2,
-                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
                 ),
-                child: ClipOval(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
                   child: imageUrl != null
                       ? Image.network(
                     imageUrl!,
-                    width: 150,
-                    height: 150,
+                    width: 250,
+                    height: 250,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Icon(
-                        Icons.person,
-                        size: 100,
-                        color: Colors.grey[600],
-                      );
+                        Icons.error,
+                        size: 80,
+                        color: Colors.red,
+                      ); // Fallback for errors
                     },
                   )
                       : Icon(
                     Icons.person,
-                    size: 100,
-                    color: Colors.grey[600],
-                  ),
+                    size: 120,
+                    color: Colors.black54,
+                  ), // Fallback icon
                 ),
               ),
               SizedBox(height: 20),
@@ -105,7 +146,7 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
               Text(
                 firstName != null && lastName != null
                     ? '$firstName $lastName'
-                    : 'Loading...',
+                    : 'Unknown Lecturer',
                 style: TextStyle(
                   fontSize: 28, // Increased font size
                   fontWeight: FontWeight.bold,
@@ -125,7 +166,8 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
               // Profile Info Cards
               if (email != null) ProfileInfoCard('Email: $email'),
               if (city != null) ProfileInfoCard('City: $city'),
-              if (facultyName != null) ProfileInfoCard('Faculty: $facultyName'),
+              if (facultyName != null)
+                ProfileInfoCard('Faculty: $facultyName'),
             ],
           ),
         ),
@@ -141,17 +183,28 @@ class ProfileInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Color(0xFF87A98F), // Greenish shade
-          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            colors: [Color(0xFF87A98F), Color(0xFF6C8E7D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
         ),
         child: Text(
           text,
-          style: TextStyle(fontSize: 18, color: Colors.black87), // Increased font size
+          style: TextStyle(fontSize: 18, color: Colors.white),
         ),
       ),
     );

@@ -18,8 +18,7 @@ class StudentChatScreen extends StatefulWidget {
   _StudentChatScreenState createState() => _StudentChatScreenState();
 }
 
-class _StudentChatScreenState extends State<StudentChatScreen>
-    with SingleTickerProviderStateMixin {
+class _StudentChatScreenState extends State<StudentChatScreen> {
   int _sentMessagesToday = 0;
   final List<String> _predefinedMessages = [
     "Is there a tutorial session for this topic?",
@@ -28,21 +27,26 @@ class _StudentChatScreenState extends State<StudentChatScreen>
     "Hello sir!",
   ];
 
-  late AnimationController _controller;
-  late Animation<Offset> _animation;
+  String lecturerImageUrl = "";
 
   @override
   void initState() {
     super.initState();
     _checkMessagesToday();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = Tween<Offset>(
-      begin: Offset(0, 1),
-      end: Offset(0, 0),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _fetchLecturerImage();
+    _markLecturerMessagesAsRead(); // Mark lecturer's messages as read when the chat is opened
+  }
+
+  Future<void> _fetchLecturerImage() async {
+    DocumentSnapshot lecturerSnapshot = await FirebaseFirestore.instance
+        .collection('Lecturer')
+        .doc(widget.lecturerId)
+        .get();
+    if (lecturerSnapshot.exists) {
+      setState(() {
+        lecturerImageUrl = lecturerSnapshot['Image'];
+      });
+    }
   }
 
   Future<void> _checkMessagesToday() async {
@@ -74,22 +78,48 @@ class _StudentChatScreenState extends State<StudentChatScreen>
       'receiverId': widget.lecturerId,
       'message': message,
       'timestamp': FieldValue.serverTimestamp(),
+      'isRead': false, // Default to unread
     });
 
     setState(() {
       _sentMessagesToday++;
     });
+  }
 
-    _controller.forward(from: 0);
+  Future<void> _markLecturerMessagesAsRead() async {
+    // Mark all messages from the lecturer as read
+    QuerySnapshot messages = await FirebaseFirestore.instance
+        .collection('Messages')
+        .where('senderId', isEqualTo: widget.lecturerId)
+        .where('receiverId', isEqualTo: widget.studentUid)
+        .where('isRead', isEqualTo: false)
+        .get();
+
+    for (var message in messages.docs) {
+      await FirebaseFirestore.instance
+          .collection('Messages')
+          .doc(message.id)
+          .update({'isRead': true});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "${widget.lecturerFirstName} ${widget.lecturerLastName}",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            if (lecturerImageUrl.isNotEmpty)
+              CircleAvatar(
+                backgroundImage: NetworkImage(lecturerImageUrl),
+                radius: 16,
+              ),
+            SizedBox(width: 8),
+            Text(
+              "${widget.lecturerFirstName} ${widget.lecturerLastName}",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -97,7 +127,13 @@ class _StudentChatScreenState extends State<StudentChatScreen>
         ),
       ),
       body: Container(
-        color: Color(0xFFF5F0E6),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF5F0E6), Color(0xFFE0D7C3)],
+          ),
+        ),
         child: Column(
           children: [
             Expanded(
@@ -106,7 +142,7 @@ class _StudentChatScreenState extends State<StudentChatScreen>
                     .collection('Messages')
                     .where('senderId', whereIn: [widget.studentUid, widget.lecturerId])
                     .where('receiverId', whereIn: [widget.studentUid, widget.lecturerId])
-                    .orderBy('timestamp', descending: true)
+                    .orderBy('timestamp', descending: false) // Order by timestamp ascending
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -115,34 +151,50 @@ class _StudentChatScreenState extends State<StudentChatScreen>
 
                   var messages = snapshot.data!.docs;
 
-                  return ListView.builder(
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      var message = messages[index].data() as Map<String, dynamic>;
-                      bool isMe = message['senderId'] == widget.studentUid;
+                  return ListView(
+                    reverse: false, // Do not reverse the list
+                    children: messages.map((message) {
+                      var data = message.data() as Map<String, dynamic>;
+                      bool isMe = data['senderId'] == widget.studentUid;
 
-                      return SlideTransition(
-                        position: _animation,
-                        child: Align(
-                          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: isMe ? Colors.white : Colors.black,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              message['message'],
-                              style: TextStyle(
-                                color: isMe ? Colors.black : Colors.white,
+                      return Align(
+                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.white : Colors.black,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(2, 2),
                               ),
-                            ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data['message'],
+                                style: TextStyle(
+                                  color: isMe ? Colors.black : Colors.white,
+                                ),
+                              ),
+                              if (!isMe && !data['isRead']) // Show "Unread" indicator for lecturer's messages
+                                Text(
+                                  "Unread",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       );
-                    },
+                    }).toList(),
                   );
                 },
               ),
@@ -179,11 +231,5 @@ class _StudentChatScreenState extends State<StudentChatScreen>
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

@@ -14,6 +14,9 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  bool _obscurePassword = true;
+  bool _isLoading = false; // To track login loading state
+
   void _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -22,6 +25,10 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
       _showError("Please fill in all fields.");
       return;
     }
+
+    setState(() {
+      _isLoading = true; // Show loading indicator
+    });
 
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -61,6 +68,10 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
       }
     } catch (e) {
       _showError("Error: ${e.toString()}");
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide loading indicator
+      });
     }
   }
 
@@ -100,7 +111,7 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _login,
+                onPressed: _isLoading ? null : _login, // Disable button when loading
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFA7B89C),
                   shape: RoundedRectangleBorder(
@@ -111,7 +122,16 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
                     vertical: 12,
                   ),
                 ),
-                child: const Text(
+                child: _isLoading
+                    ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                  ),
+                )
+                    : const Text(
                   "Login",
                   style: TextStyle(
                     fontSize: 18,
@@ -130,7 +150,7 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
   Widget _buildTextField(String label, bool isPassword) {
     return TextField(
       controller: isPassword ? _passwordController : _emailController,
-      obscureText: isPassword,
+      obscureText: isPassword ? _obscurePassword : false,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
@@ -143,6 +163,19 @@ class _LecturerLoginPageState extends State<LecturerLoginPage> {
           horizontal: 20,
           vertical: 12,
         ),
+        suffixIcon: isPassword
+            ? IconButton(
+          icon: Icon(
+            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+        )
+            : null,
       ),
     );
   }

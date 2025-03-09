@@ -22,6 +22,8 @@ class LecturerHomePage extends StatefulWidget {
 class _LecturerHomePageState extends State<LecturerHomePage> {
   String? lecturerName;
   String? lecturerStatus;
+  int unreadMessageCount = 0;
+  int pendingAppointmentCount = 0;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
@@ -30,6 +32,8 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
     _fetchLecturerName();
     _fetchLecturerStatus();
     _setupFCM();
+    _fetchUnreadMessageCount();
+    _fetchPendingAppointmentCount();
   }
 
   Future<void> _setupFCM() async {
@@ -99,6 +103,38 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
       }
     } catch (e) {
       print("Error fetching lecturer status: $e");
+    }
+  }
+
+  Future<void> _fetchUnreadMessageCount() async {
+    try {
+      QuerySnapshot unreadMessages = await FirebaseFirestore.instance
+          .collection('Messages')
+          .where('receiverId', isEqualTo: widget.lecturerUid)
+          .where('isRead', isEqualTo: false)
+          .get();
+
+      setState(() {
+        unreadMessageCount = unreadMessages.docs.length;
+      });
+    } catch (e) {
+      print("Error fetching unread messages: $e");
+    }
+  }
+
+  Future<void> _fetchPendingAppointmentCount() async {
+    try {
+      QuerySnapshot pendingAppointments = await FirebaseFirestore.instance
+          .collection('Appointments')
+          .where('lecturerUid', isEqualTo: widget.lecturerUid)
+          .where('status', isEqualTo: 'Pending')
+          .get();
+
+      setState(() {
+        pendingAppointmentCount = pendingAppointments.docs.length;
+      });
+    } catch (e) {
+      print("Error fetching pending appointments: $e");
     }
   }
 
@@ -240,11 +276,13 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                       "assets/inbox.png",
                       "Inbox",
                       LecturerInboxScreen(lecturerUid: widget.lecturerUid),
+                      unreadMessageCount,
                     ),
                     _buildActionButton(
                       "assets/appointment.png",
                       "Appointments",
                       LecturersAppointment(),
+                      pendingAppointmentCount,
                     ),
                   ],
                 ),
@@ -315,28 +353,51 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
     );
   }
 
-  Widget _buildActionButton(String iconPath, String label, Widget page) {
+  Widget _buildActionButton(String iconPath, String label, Widget page, int count) {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
-      child: Column(
+      child: Stack(
         children: [
-          Container(
-            width: 120,
-            height: 100,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+          Column(
+            children: [
+              Container(
+                width: 120,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+                ),
+                child: Center(child: Image.asset(iconPath, width: 50, height: 50)),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          if (count > 0)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  count.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
             ),
-            child: Center(child: Image.asset(iconPath, width: 50, height: 50)),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
         ],
       ),
     );

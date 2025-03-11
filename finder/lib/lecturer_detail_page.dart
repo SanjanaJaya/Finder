@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'student_chat_screen.dart';
+import 'lecturer_cabin_location.dart';
 
 class LecturerDetailPage extends StatefulWidget {
   final Map<String, dynamic> lecturer;
@@ -316,6 +317,37 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               },
               icon: const Icon(Icons.chat, color: Colors.white),
               label: const Text("Chat with Lecturer"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black, // Black button
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              ),
+            ),
+
+            // Inside the build method of LecturerDetailPage, add this button:
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                if (widget.lecturer.containsKey('uid')) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LecturerCabinLocationPage(
+                        lecturer: widget.lecturer,
+                      ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Lecturer details are missing!")),
+                  );
+                }
+              },
+              icon: const Icon(Icons.location_on, color: Colors.white),
+              label: const Text("View Cabin Location"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black, // Black button
                 foregroundColor: Colors.white,

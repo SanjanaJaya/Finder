@@ -81,7 +81,7 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
                       itemCount: filteredRooms.length,
                       itemBuilder: (context, index) {
                         var studyRoom = filteredRooms[index];
-                        return _buildRoomCategory(context, studyRoom['Name'], studyRoom);
+                        return _buildRoomCard(context, studyRoom['Name'], studyRoom);
                       },
                     );
                   }
@@ -94,10 +94,15 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
     );
   }
 
-  Widget _buildRoomCategory(BuildContext context, String title, Map<String, dynamic> studyRoom) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: GestureDetector(
+  Widget _buildRoomCard(BuildContext context, String title, Map<String, dynamic> studyRoom) {
+    bool isBooked = studyRoom['isBooked'] ?? false;
+
+    return Card(
+      elevation: 4, // Add shadow to the card
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15), // Rounded corners
+      ),
+      child: InkWell(
         onTap: () {
           Navigator.push(
             context,
@@ -106,16 +111,50 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
             ),
           );
         },
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Color(0xffa9c6a8), // Greenish button
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              // Status Indicator
+              Container(
+                width: 10,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isBooked ? Colors.red : Colors.green,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              SizedBox(width: 16), // Spacing between indicator and content
+              // Room Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      isBooked ? "Booked" : "Available",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isBooked ? Colors.red : Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Icon
+              Icon(
+                isBooked ? Icons.lock : Icons.lock_open,
+                color: isBooked ? Colors.red : Colors.green,
+              ),
+            ],
           ),
         ),
       ),

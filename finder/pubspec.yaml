@@ -52,3 +52,5 @@ flutter:
     - assets/inbox.png
     - assets/Switch.png
     - assets/campus_large.png
+    - assets/profile_icon.png
+    - assets/logout_icon.png

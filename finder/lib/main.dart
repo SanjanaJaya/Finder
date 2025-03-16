@@ -101,11 +101,6 @@ class _HomePageState extends State<HomePage> {
                     Image.asset("assets/NSBM_logo.png", width: 130),
                     Row(
                       children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back, size: 30),
-                          onPressed: () => _logout(context),
-                        ),
-                        SizedBox(width: 15),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -113,7 +108,32 @@ class _HomePageState extends State<HomePage> {
                               MaterialPageRoute(builder: (context) => StudentProfilePage()),
                             );
                           },
-                          child: Icon(Icons.person, size: 30),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 5),
+                              ],
+                            ),
+                            child: Image.asset("assets/profile_icon.png", width: 24, height: 24),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: () => _logout(context),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 5),
+                              ],
+                            ),
+                            child: Image.asset("assets/logout_icon.png", width: 24, height: 24),
+                          ),
                         ),
                       ],
                     ),

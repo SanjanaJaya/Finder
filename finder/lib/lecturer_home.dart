@@ -211,12 +211,32 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
                               ),
                             );
                           },
-                          child: const Icon(Icons.person, size: 30),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 5),
+                              ],
+                            ),
+                            child: Image.asset("assets/profile_icon.png", width: 24, height: 24),
+                          ),
                         ),
                         const SizedBox(width: 10),
                         GestureDetector(
                           onTap: _logout,
-                          child: const Icon(Icons.logout, size: 30),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 5),
+                              ],
+                            ),
+                            child: Image.asset("assets/logout_icon.png", width: 24, height: 24),
+                          ),
                         ),
                       ],
                     ),

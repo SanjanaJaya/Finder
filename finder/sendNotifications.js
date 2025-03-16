@@ -195,4 +195,4 @@ const testNotification = async () => {
 };
 
 // Uncomment the line below to test notifications manually
-// testNotification();
+testNotification();

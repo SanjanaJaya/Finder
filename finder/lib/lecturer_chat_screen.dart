@@ -207,6 +207,7 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
       'receiverId': widget.senderId,
       'message': _messageController.text.trim(),
       'timestamp': DateTime.now(),
+      'isRead': false, // Add this line to set isRead to false
     });
 
     _messageController.clear();

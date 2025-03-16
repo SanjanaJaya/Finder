@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'main.dart'; // Import your HomePage to navigate after successful login
 
 class StudentLoginPage extends StatefulWidget {
@@ -13,6 +14,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   bool _obscurePassword = true; // To toggle password visibility
   bool _isLoading = false; // To track login loading state
@@ -31,7 +33,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
     });
 
     try {
-      // First, authenticate the user using Firebase Authentication
+      // Authenticate the user using Firebase Authentication
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -42,13 +44,13 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
         QuerySnapshot query = await _firestore
             .collection('Person')
             .where('Email', isEqualTo: email)
-            .where(
-          'Password',
-          isEqualTo: password,
-        ) // Ensure plaintext passwords aren't stored in production
+            .where('Password', isEqualTo: password) // Ensure plaintext passwords aren't stored in production
             .get();
 
         if (query.docs.isNotEmpty) {
+          // Generate and store FCM token
+          await _storeFCMToken(userCredential.user!.uid);
+
           // Navigate to the HomePage on successful login
           Navigator.pushReplacement(
             context,
@@ -68,6 +70,40 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
       setState(() {
         _isLoading = false; // Hide loading indicator
       });
+    }
+  }
+
+  // Generate and store FCM token in Firestore
+  Future<void> _storeFCMToken(String uid) async {
+    try {
+      // Request permission for notifications (required for iOS)
+      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        // Get the FCM token
+        String? token = await _firebaseMessaging.getToken();
+        print('Generated FCM token: $token');
+
+        if (token != null) {
+          // Store the token in the Person collection
+          await _firestore.collection('Person').doc(uid).set(
+            {
+              'fcmToken': token,
+            },
+            SetOptions(merge: true), // Merge with existing document
+          );
+
+          print('FCM token stored successfully in Firestore.');
+        }
+      } else {
+        print('Notification permissions denied.');
+      }
+    } catch (e) {
+      print('Error storing FCM token: $e');
     }
   }
 

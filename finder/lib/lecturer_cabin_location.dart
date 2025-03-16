@@ -18,6 +18,7 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
   LatLng? _cabinLocation;
   LatLng? _userLocation;
   bool _isLoading = true;
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -38,52 +39,82 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
         final latitude = locationData['latitude'];
         final longitude = locationData['longitude'];
 
-        setState(() {
-          _cabinLocation = LatLng(latitude, longitude);
-          _isLoading = false;
-        });
+        if (latitude != null && longitude != null) {
+          setState(() {
+            _cabinLocation = LatLng(latitude, longitude);
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _errorMessage = 'Cabin location not available for this lecturer.';
+            _isLoading = false;
+          });
+        }
       } else {
         setState(() {
+          _errorMessage = 'Lecturer data not found.';
           _isLoading = false;
         });
       }
     } catch (e) {
       print("Error fetching location data: $e");
       setState(() {
+        _errorMessage = 'Failed to fetch location data.';
         _isLoading = false;
       });
     }
   }
 
   Future<void> _getUserLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _errorMessage = 'Location services are disabled.';
+        });
         return;
       }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _errorMessage = 'Location permissions are denied.';
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _errorMessage = 'Location permissions are permanently denied.';
+        });
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _userLocation = LatLng(position.latitude, position.longitude);
+      });
+    } catch (e) {
+      print("Error getting user location: $e");
+      setState(() {
+        _errorMessage = 'Failed to get user location.';
+      });
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    setState(() {
-      _userLocation = LatLng(position.latitude, position.longitude);
-    });
   }
 
   Future<void> _showDirections() async {
-    if (_cabinLocation == null || _userLocation == null) return;
+    if (_cabinLocation == null || _userLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location data is incomplete.')),
+      );
+      return;
+    }
 
     final url = 'https://www.google.com/maps/dir/?api=1&origin=${_userLocation!.latitude},${_userLocation!.longitude}&destination=${_cabinLocation!.latitude},${_cabinLocation!.longitude}&travelmode=driving';
 
@@ -99,16 +130,18 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Lecturer Cabin Location"),
-        backgroundColor: Colors.transparent, // Custom app bar color
+        backgroundColor: Colors.transparent,
       ),
       body: Container(
-        color: Color(0xFFEEE7DA), // Set background color
+        color: Color(0xFFEEE7DA),
         child: _isLoading
             ? Center(child: CircularProgressIndicator())
+            : _errorMessage.isNotEmpty
+            ? Center(child: Text(_errorMessage, style: TextStyle(fontSize: 18, color: Colors.red)))
             : SingleChildScrollView(
           child: Column(
             children: [
-              // Bigger Google Map with a beautiful box
+              // Google Map
               Container(
                 margin: EdgeInsets.all(15),
                 decoration: BoxDecoration(
@@ -118,14 +151,14 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
                       color: Colors.black.withOpacity(0.5),
                       spreadRadius: 2,
                       blurRadius: 7,
-                      offset: Offset(0, 3), // Shadow position
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Container(
-                    height: 490, // Bigger map height
+                    height: 490,
                     child: GoogleMap(
                       onMapCreated: (controller) {
                         _mapController = controller;
@@ -155,7 +188,7 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
                   ),
                 ),
               ),
-              // Display additional data
+              // Lecturer Details
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -187,8 +220,8 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 16, width: 60,),
-                    // Bigger and styled Building and Floor text
+                    SizedBox(height: 16),
+                    // Building and Floor Details
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -199,7 +232,7 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
                             color: Colors.black.withOpacity(0.3),
                             spreadRadius: 2,
                             blurRadius: 5,
-                            offset: Offset(0, 2), // Shadow position
+                            offset: Offset(0, 2),
                           ),
                         ],
                       ),
@@ -227,19 +260,19 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
                       ),
                     ),
                     SizedBox(height: 15),
-                    // Styled Button (Updated to match the image)
+                    // Directions Button
                     Center(
                       child: ElevatedButton(
                         onPressed: _showDirections,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black, // Button background color
-                          foregroundColor: Colors.white, // Button text color
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: Colors.black, width: 2), // Border color
+                            side: BorderSide(color: Colors.black, width: 2),
                           ),
-                          elevation: 5, // Shadow
+                          elevation: 5,
                         ),
                         child: Text(
                           "Show Directions",

@@ -98,9 +98,9 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Center(
-        child: isLoading
-            ? Column(
+      body: isLoading
+          ? Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
@@ -110,9 +110,11 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
               style: TextStyle(fontSize: 16, color: Colors.black54),
             ),
           ],
-        )
-            : errorMessage.isNotEmpty
-            ? Column(
+        ),
+      )
+          : errorMessage.isNotEmpty
+          ? Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error_outline, size: 60, color: Colors.red),
@@ -123,103 +125,133 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
               style: TextStyle(fontSize: 16, color: Colors.red),
             ),
           ],
-        )
-            : SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Bigger Profile Photo with Rounded Corners and Shadow
-              Container(
-                width: 250, // Increased width
-                height: 250, // Increased height
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: Offset(0, 5),
+        ),
+      )
+          : SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Profile Photo Container with Background Image
+            Container(
+              width: double.infinity,
+              height: 300,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/campus_large.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Center(
+                child: Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.8),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 5,
                     ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: imageUrl.isNotEmpty
-                      ? Image.network(
-                    imageUrl,
-                    width: 250,
-                    height: 250,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.error,
-                        size: 80,
-                        color: Colors.red,
-                      ); // Fallback for errors
-                    },
-                  )
-                      : Icon(
-                    Icons.person,
-                    size: 120,
-                    color: Colors.black54,
-                  ), // Fallback icon
-                ),
-              ),
-              SizedBox(height: 20),
-              // Student Name
-              Text(
-                "$firstName $lastName",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: imageUrl.isNotEmpty
+                        ? Image.network(
+                      imageUrl,
+                      width: 180,
+                      height: 180,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.person,
+                          size: 80,
+                          color: Colors.black54,
+                        ); // Fallback for errors
+                      },
+                    )
+                        : Icon(
+                      Icons.person,
+                      size: 80,
+                      color: Colors.black54,
+                    ), // Fallback icon
+                  ),
                 ),
               ),
-              SizedBox(height: 20),
-              // Profile Info Cards
-              ProfileInfoCard('Student ID: $id'),
-              ProfileInfoCard('Intake: $intake'),
-              ProfileInfoCard('Faculty: $faculty'),
-              ProfileInfoCard('Email: $email'),
-              ProfileInfoCard('Degree: $degree'),
-            ],
-          ),
+            ),
+            SizedBox(height: 20),
+            // Student Name
+            Text(
+              "$firstName $lastName",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: 10),
+            // Student ID
+            Text(
+              "ID: $id",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.black54,
+              ),
+            ),
+            SizedBox(height: 30),
+            // Profile Info Cards
+            _buildInfoCard('Intake', intake),
+            _buildInfoCard('Faculty', faculty),
+            _buildInfoCard('Email', email),
+            _buildInfoCard('Degree', degree),
+          ],
         ),
       ),
     );
   }
-}
 
-class ProfileInfoCard extends StatelessWidget {
-  final String text;
-  ProfileInfoCard(this.text);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildInfoCard(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF87A98F), Color(0xFF6C8E7D)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withOpacity(0.1),
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
           ],
         ),
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 16, color: Colors.white),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ),
     );

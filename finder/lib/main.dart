@@ -11,7 +11,7 @@ import 'contact_us.dart';
 import 'about_us.dart';
 import 'view_bookings.dart';
 import 'student_profile_page.dart';
-import 'opening_page.dart';
+import 'opening_page.dart'; // Ensure this import is correct
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,22 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (snapshot.hasData) {
-            return HomePage();
-          } else {
-            return OpeningPage();
-          }
-        },
-      ),
+      home: OpeningPage(), // Set OpeningPage as the starting page
     );
   }
 }

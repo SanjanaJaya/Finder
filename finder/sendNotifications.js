@@ -1,8 +1,9 @@
 const admin = require('firebase-admin');
 const path = require('path');
+const cron = require('node-cron');
 
 // Resolve the path to the service account key
-const serviceAccountPath = path.resolve(__dirname, 'finder-cc54d-firebase-adminsdk-fbsvc-17d9cd66cc.json');
+const serviceAccountPath = path.resolve(__dirname, 'finder-cc54d-firebase-adminsdk-fbsvc-5e3ff793d3.json');
 console.log('Resolved path:', serviceAccountPath);
 
 // Initialize Firebase Admin SDK
@@ -10,6 +11,44 @@ const serviceAccount = require(serviceAccountPath);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+
+// Function to fetch sender details (name and image)
+const fetchSenderDetails = async (senderId) => {
+  try {
+    // Check the Person collection first
+    const personSnapshot = await admin.firestore()
+      .collection('Person')
+      .where('uid', '==', senderId)
+      .get();
+
+    if (!personSnapshot.empty) {
+      const senderData = personSnapshot.docs[0].data();
+      return {
+        name: `${senderData.First_Name} ${senderData.Last_Name}`,
+        image: senderData.Image,
+      };
+    }
+
+    // If not found in Person collection, check Lecturer collection
+    const lecturerSnapshot = await admin.firestore()
+      .collection('Lecturer')
+      .where('uid', '==', senderId)
+      .get();
+
+    if (!lecturerSnapshot.empty) {
+      const senderData = lecturerSnapshot.docs[0].data();
+      return {
+        name: `${senderData.L_First_Name} ${senderData.L_Last_Name}`,
+        image: senderData.Image,
+      };
+    }
+
+    return null; // Sender not found
+  } catch (error) {
+    console.error('Error fetching sender details:', error);
+    return null;
+  }
+};
 
 // Function to send notifications
 const sendNotification = async (recipientId, messageText, senderId) => {
@@ -46,14 +85,39 @@ const sendNotification = async (recipientId, messageText, senderId) => {
     const fcmToken = recipientData.fcmToken;
 
     if (fcmToken) {
+      // Fetch sender details (name and image)
+      const senderDetails = await fetchSenderDetails(senderId);
+
+      if (!senderDetails) {
+        console.log('Sender details not found for senderId:', senderId);
+        return;
+      }
+
       const message = {
         notification: {
-          title: 'New Message Received',
-          body: messageText,
+          title: senderDetails.name, // Sender's name as the notification title
+          body: messageText, // Message content as the notification body
         },
         data: {
           senderId: senderId,
-          message: messageText,
+          senderName: senderDetails.name, // Include sender's name in the data payload
+          senderImage: senderDetails.image, // Include sender's image URL in the data payload
+          message: messageText, // Include the message in the data payload
+        },
+        android: {
+          notification: {
+            imageUrl: senderDetails.image, // Add image URL for Android BigPictureStyle
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              'mutable-content': 1, // Enable mutable content for iOS
+            },
+          },
+          fcm_options: {
+            image: senderDetails.image, // Add image URL for iOS
+          },
         },
         token: fcmToken,
       };
@@ -67,6 +131,41 @@ const sendNotification = async (recipientId, messageText, senderId) => {
     console.error('Error sending notification:', error);
   }
 };
+
+// Function to send "Mark your availability" notifications to all logged-in lecturers
+const sendAvailabilityNotifications = async () => {
+  try {
+    // Fetch all logged-in lecturers
+    const lecturersSnapshot = await admin.firestore()
+      .collection('Lecturer')
+      .where('isLoggedIn', '==', true)
+      .get();
+
+    if (lecturersSnapshot.empty) {
+      console.log('No logged-in lecturers found.');
+      return;
+    }
+
+    // Send notifications to each logged-in lecturer
+    lecturersSnapshot.forEach((doc) => {
+      const lecturerData = doc.data();
+      const lecturerId = lecturerData.uid;
+
+      // Send the notification
+      sendNotification(lecturerId, 'Mark your availability', 'system');
+    });
+
+    console.log('Availability notifications sent to all logged-in lecturers.');
+  } catch (error) {
+    console.error('Error sending availability notifications:', error);
+  }
+};
+
+// Schedule notifications at 9:00 AM and 5:00 PM on weekdays
+cron.schedule('0 9,17 * * 1-5', () => {
+  console.log('Sending availability notifications...');
+  sendAvailabilityNotifications();
+});
 
 // Listen for new messages in the Messages collection
 const setupMessageListener = () => {

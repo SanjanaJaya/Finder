@@ -8,6 +8,17 @@ Future<List<Map<String, dynamic>>> fetchStudyRooms() async {
   return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
 }
 
+// Function to fetch booker's name by UID
+Future<String> fetchBookerName(String? uid) async {
+  if (uid == null) return 'Available'; // Handle null UID for available rooms
+  DocumentSnapshot docSnapshot = await FirebaseFirestore.instance.collection('Person').doc(uid).get();
+  if (docSnapshot.exists) {
+    return '${docSnapshot['First_Name']} ${docSnapshot['Last_Name']}';
+  } else {
+    return 'Unknown';
+  }
+}
+
 class StudyRoomListPage extends StatefulWidget {
   @override
   _StudyRoomListPageState createState() => _StudyRoomListPageState();
@@ -96,6 +107,7 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
 
   Widget _buildRoomCard(BuildContext context, String title, Map<String, dynamic> studyRoom) {
     bool isBooked = studyRoom['isBooked'] ?? false;
+    String? bookedByUid = studyRoom['bookedBy']; // Handle null bookedBy
 
     return Card(
       elevation: 4, // Add shadow to the card
@@ -146,6 +158,19 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
                         color: isBooked ? Colors.red : Colors.green,
                       ),
                     ),
+                    if (isBooked)
+                      FutureBuilder<String>(
+                        future: fetchBookerName(bookedByUid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Text('Loading...', style: TextStyle(fontSize: 14, color: Colors.grey));
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}', style: TextStyle(fontSize: 14, color: Colors.red));
+                          } else {
+                            return Text('Booked by: ${snapshot.data}', style: TextStyle(fontSize: 14, color: Colors.black));
+                          }
+                        },
+                      ),
                   ],
                 ),
               ),

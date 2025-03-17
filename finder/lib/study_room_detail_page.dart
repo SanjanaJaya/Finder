@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // For getting the current user's UID
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StudyRoomDetailPage extends StatelessWidget {
   final Map<String, dynamic> studyRoom;
 
   StudyRoomDetailPage({required this.studyRoom});
 
-  // Function to check if the user has already booked a room
   Future<bool> _hasUserBookedRoom(String uid) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('Study_Rooms')
         .where('bookedBy', isEqualTo: uid)
         .get();
-
-    return querySnapshot.docs.isNotEmpty; // Returns true if the user has booked a room
+    return querySnapshot.docs.isNotEmpty;
   }
 
-  // Function to book the study room
   Future<void> _bookStudyRoom(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -34,7 +31,6 @@ class StudyRoomDetailPage extends StatelessWidget {
       return;
     }
 
-    // Check if the user has already booked a room
     final hasBooked = await _hasUserBookedRoom(user.uid);
     if (hasBooked) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,7 +42,7 @@ class StudyRoomDetailPage extends StatelessWidget {
     try {
       await FirebaseFirestore.instance
           .collection('Study_Rooms')
-          .doc(studyRoom['Name']) // Use the room name as the document ID
+          .doc(studyRoom['Name'])
           .update({
         'isBooked': true,
         'bookedBy': user.uid,
@@ -56,7 +52,6 @@ class StudyRoomDetailPage extends StatelessWidget {
         SnackBar(content: Text('Room booked successfully!')),
       );
 
-      // Navigate back to the previous page
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -65,8 +60,9 @@ class StudyRoomDetailPage extends StatelessWidget {
     }
   }
 
-  // Function to fetch booker's name from the Person collection
-  Future<String> _fetchBookerName(String uid) async {
+  Future<String> _fetchBookerName(String? uid) async {
+    if (uid == null) return 'Unknown User';
+
     final docSnapshot = await FirebaseFirestore.instance
         .collection('Person')
         .doc(uid)
@@ -82,6 +78,9 @@ class StudyRoomDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isBooked = studyRoom['isBooked'] ?? false;
+    final String? bookedByUid = studyRoom['bookedBy'];
+
     return Scaffold(
       backgroundColor: Color(0xffeee7da), // Beige background
       appBar: AppBar(
@@ -91,7 +90,10 @@ class StudyRoomDetailPage extends StatelessWidget {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(studyRoom['Name'], style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
+        title: Text(
+          studyRoom['Name'] ?? 'Study Room',
+          style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
       ),
       body: Center(
@@ -107,12 +109,23 @@ class StudyRoomDetailPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
+                  color: Color(0xfff4f1eb), // Light beige card background
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.network(
+                            studyRoom['Image'] ?? 'https://via.placeholder.com/150',
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(height: 20),
                         Text(
-                          studyRoom['Name'],
+                          studyRoom['Name'] ?? 'Study Room',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -120,16 +133,18 @@ class StudyRoomDetailPage extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 20),
-                        _buildDetailRow('Floor', studyRoom['Floor']),
-                        _buildDetailRow('Location', studyRoom['Location']),
+                        _buildDetailRow('Floor', studyRoom['Floor'] ?? 'N/A'),
+                        _buildDetailRow('Location', studyRoom['Location'] ?? 'N/A'),
+                        _buildDetailRow('Seating Capacity', studyRoom['Seating_Capacity'] ?? 'N/A'),
+                        _buildDetailRow('Plug Count', studyRoom['Plug_Count'].toString()),
                         _buildDetailRow(
                           'Status',
-                          studyRoom['isBooked'] ? 'Booked' : 'Available',
-                          textColor: studyRoom['isBooked'] ? Colors.red : Colors.green,
+                          isBooked ? 'Booked' : 'Available',
+                          textColor: isBooked ? Colors.red : Colors.green,
                         ),
-                        if (studyRoom['isBooked'])
+                        if (isBooked && bookedByUid != null)
                           FutureBuilder<String>(
-                            future: _fetchBookerName(studyRoom['bookedBy']),
+                            future: _fetchBookerName(bookedByUid),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
                                 return _buildDetailRow('Booked By', 'Loading...');
@@ -147,7 +162,7 @@ class StudyRoomDetailPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20),
-                if (!studyRoom['isBooked'])
+                if (!isBooked)
                   ElevatedButton(
                     onPressed: () => _bookStudyRoom(context),
                     style: ElevatedButton.styleFrom(
@@ -170,7 +185,6 @@ class StudyRoomDetailPage extends StatelessWidget {
     );
   }
 
-  // Helper function to build a detail row
   Widget _buildDetailRow(String label, String value, {Color textColor = Colors.black}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

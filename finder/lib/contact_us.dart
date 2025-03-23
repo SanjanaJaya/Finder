@@ -4,7 +4,7 @@ class ContactUsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffeee7da), // Beige background
+      backgroundColor: const Color(0xffeee7da),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -27,7 +27,11 @@ class ContactUsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // University Logo
+            // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
+
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -44,8 +48,11 @@ class ContactUsPage extends StatelessWidget {
               child: Image.asset("assets/NSBM_logo.png", width: 150),
             ),
             const SizedBox(height: 25),
-
-            // Contact Info Section
+            //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
             _buildContactCard(
               Icons.location_on,
               "Mahenwaththa, Pitipana, Homagama, Sri Lanka",
@@ -59,7 +66,7 @@ class ContactUsPage extends StatelessWidget {
     );
   }
 
-  // Contact Card with Icons & Text
+
   Widget _buildContactCard(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

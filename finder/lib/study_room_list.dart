@@ -28,6 +28,10 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
   final Future<List<Map<String, dynamic>>> studyRoomsFuture = fetchStudyRooms();
   String searchQuery = ""; // Track the search query
 
+  // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +92,10 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
                         room['Name'].toLowerCase().contains(searchQuery))
                         .toList();
 
+                    // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
                     return ListView.builder(
                       itemCount: filteredRooms.length,
                       itemBuilder: (context, index) {
@@ -171,6 +179,11 @@ class _StudyRoomListPageState extends State<StudyRoomListPage> {
                           }
                         },
                       ),
+                    //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
                   ],
                 ),
               ),

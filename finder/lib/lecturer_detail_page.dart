@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/intl.dart';
 import 'student_chat_screen.dart';
 import 'lecturer_cabin_location.dart';
 
@@ -19,7 +19,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
   String availabilityStatus = "Loading...";
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  bool showDateTimePickers = false; // Controls visibility of date/time pickers
+  bool showDateTimePickers = false;
 
   @override
   void initState() {
@@ -53,7 +53,11 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
     }
   }
 
-  // Function to book an appointment
+  //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
   Future<void> _bookAppointment(BuildContext context) async {
     if (selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -68,14 +72,14 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
         'studentUid': widget.studentUid,
         'date': Timestamp.fromDate(selectedDate!),
         'time': '${selectedTime!.hour}:${selectedTime!.minute}',
-        'status': 'Pending', // Initial status
+        'status': 'Pending',
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Appointment booked successfully!')),
       );
 
-      // Reset the state after booking
+
       setState(() {
         selectedDate = null;
         selectedTime = null;
@@ -88,7 +92,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
     }
   }
 
-  // Function to select a date
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -103,7 +107,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
     }
   }
 
-  // Function to select a time
+
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -138,10 +142,10 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Larger Lecturer Image
+
             Container(
-              width: 150, // Increased size
-              height: 150, // Increased size
+              width: 150,
+              height: 150,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -171,6 +175,11 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
                 ),
               ),
             ),
+
+            // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
             const SizedBox(height: 10),
             Text(
               "${widget.lecturer['L_First_Name']} ${widget.lecturer['L_Last_Name']}",
@@ -195,7 +204,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               title: Text(widget.lecturer['Faculty_Name'] ?? "No faculty info"),
             ),
             const SizedBox(height: 20),
-            // Availability Status Button
+
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
@@ -222,11 +231,11 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Book Appointment Button
+
             ElevatedButton.icon(
               onPressed: () {
                 setState(() {
-                  showDateTimePickers = true; // Show date/time pickers
+                  showDateTimePickers = true;
                 });
               },
               icon: const Icon(Icons.calendar_today, color: Colors.white),
@@ -246,7 +255,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               ElevatedButton(
                 onPressed: () => _selectDate(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black, // Black button
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -278,7 +287,10 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Confirm Button
+              // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
               ElevatedButton.icon(
                 onPressed: () => _bookAppointment(context),
                 icon: const Icon(Icons.check, color: Colors.white),
@@ -327,7 +339,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               ),
             ),
 
-            // Inside the build method of LecturerDetailPage, add this button:
+
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
@@ -349,7 +361,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               icon: const Icon(Icons.location_on, color: Colors.white),
               label: const Text("View Cabin Location"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black, // Black button
+                backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -358,7 +370,7 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
               ),
             ),
             const SizedBox(height: 40),
-            // Sent Appointments Section
+
             const Text(
               "Sent Appointments",
               style: TextStyle(
@@ -436,6 +448,10 @@ class _LecturerDetailPageState extends State<LecturerDetailPage> {
                     },
                   );
                 }
+                // Developed By,
+                // Imesh Sanjana - 30137 - 10953245
+                // Gaveen Ranasinghe - 29934 - 10952369
+                // Sehara Gishan - 26041 - 10953243
               },
             ),
           ],

@@ -26,6 +26,10 @@ class _LecturersAppointmentState extends State<LecturersAppointment> {
     final lecturerUid = _auth.currentUser?.uid;
     if (lecturerUid == null) return;
 
+    // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
     try {
       final lecturerDoc = await _firestore
           .collection('Lecturer')
@@ -159,6 +163,11 @@ class _LecturersAppointmentState extends State<LecturersAppointment> {
                               final studentData = studentSnapshot.data!.data() as Map<String, dynamic>;
                               final studentName = '${studentData['First_Name']} ${studentData['Last_Name']}';
 
+                              //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
                               return Card(
                                 margin: const EdgeInsets.symmetric(vertical: 8),
                                 child: Padding(
@@ -230,6 +239,10 @@ class _LecturersAppointmentState extends State<LecturersAppointment> {
                   }
                 },
               ),
+              // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
             ),
           ],
         ),

@@ -228,6 +228,11 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
             ),
             SizedBox(height: 10),
             // Job Role
+            //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
             Text(
               jobRole ?? 'Unknown Role',
               style: TextStyle(
@@ -288,6 +293,10 @@ class _LecturerProfilePageState extends State<LecturerProfilePage> {
                         padding: EdgeInsets.symmetric(
                             horizontal: 40, vertical: 15),
                       ),
+                      // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
                       child: Text(
                         'Update Cabin Details',
                         style: TextStyle(fontSize: 16,color: Colors.white),

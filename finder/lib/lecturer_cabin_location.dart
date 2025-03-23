@@ -65,6 +65,10 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
     }
   }
 
+  // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
   Future<void> _getUserLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -116,6 +120,11 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
       return;
     }
 
+    //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
     final url = 'https://www.google.com/maps/dir/?api=1&origin=${_userLocation!.latitude},${_userLocation!.longitude}&destination=${_cabinLocation!.latitude},${_cabinLocation!.longitude}&travelmode=driving';
 
     if (await canLaunch(url)) {
@@ -274,6 +283,10 @@ class _LecturerCabinLocationPageState extends State<LecturerCabinLocationPage> {
                           ),
                           elevation: 5,
                         ),
+                        // Developed By,
+                        // Imesh Sanjana - 30137 - 10953245
+                        // Gaveen Ranasinghe - 29934 - 10952369
+                        // Sehara Gishan - 26041 - 10953243
                         child: Text(
                           "Show Directions",
                           style: TextStyle(

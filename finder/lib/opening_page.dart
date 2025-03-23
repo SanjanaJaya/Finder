@@ -20,6 +20,11 @@ class OpeningPage extends StatelessWidget {
               ),
               SizedBox(height: 30),
 
+              //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
               // Welcome Text
               Text(
                 "WELCOME",
@@ -54,6 +59,10 @@ class OpeningPage extends StatelessWidget {
           Navigator.push(context, MaterialPageRoute(builder: (context) => page));
         }
       },
+      // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
       child: Column(
         children: [
           Container(

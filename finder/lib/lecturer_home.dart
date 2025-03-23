@@ -372,6 +372,11 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
       ),
     );
   }
+  //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
 
   Widget _buildActionButton(String iconPath, String label, Widget page, int count) {
     return GestureDetector(
@@ -422,6 +427,10 @@ class _LecturerHomePageState extends State<LecturerHomePage> {
       ),
     );
   }
+  // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
 
   Widget _buildBottomButton(String iconPath, String label, Widget page) {
     return GestureDetector(

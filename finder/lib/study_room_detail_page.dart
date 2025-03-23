@@ -14,6 +14,10 @@ class StudyRoomDetailPage extends StatelessWidget {
         .get();
     return querySnapshot.docs.isNotEmpty;
   }
+  // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
 
   Future<void> _bookStudyRoom(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -75,6 +79,11 @@ class StudyRoomDetailPage extends StatelessWidget {
       return 'Unknown User';
     }
   }
+  //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
 
   @override
   Widget build(BuildContext context) {

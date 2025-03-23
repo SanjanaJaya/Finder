@@ -16,13 +16,19 @@ class LecturerChatScreen extends StatefulWidget {
   _LecturerChatScreenState createState() => _LecturerChatScreenState();
 }
 
+//Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
+
 class _LecturerChatScreenState extends State<LecturerChatScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String senderName = "";
-  String senderImageUrl = ""; // To store the student's profile photo URL
+  String senderImageUrl = "";
 
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
@@ -30,7 +36,7 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
   @override
   void initState() {
     super.initState();
-    _fetchSenderDetails(); // Fetch both name and image URL
+    _fetchSenderDetails();
 
     // Initialize animation controller
     _controller = AnimationController(
@@ -50,7 +56,7 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
       setState(() {
         senderName =
         "${senderSnapshot['First_Name']} ${senderSnapshot['Last_Name']}";
-        senderImageUrl = senderSnapshot['Image']; // Fetch the image URL
+        senderImageUrl = senderSnapshot['Image'];
       });
     }
   }
@@ -68,12 +74,12 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
         ),
         title: Row(
           children: [
-            if (senderImageUrl.isNotEmpty) // Display profile photo if available
+            if (senderImageUrl.isNotEmpty)
               CircleAvatar(
                 backgroundImage: NetworkImage(senderImageUrl),
                 radius: 16,
               ),
-            SizedBox(width: 8), // Add spacing between image and name
+            SizedBox(width: 8),
             Text(
               senderName.isNotEmpty ? senderName : "Chat",
               style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -130,7 +136,7 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
                             horizontal: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: isMe ? Colors.white : Colors.black, // Sent: white, Received: black
+                            color: isMe ? Colors.white : Colors.black,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -143,7 +149,7 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
                           child: Text(
                             message['message'],
                             style: TextStyle(
-                              color: isMe ? Colors.black : Colors.white, // Sent: black text, Received: white text
+                              color: isMe ? Colors.black : Colors.white,
                             ),
                           ),
                         ),
@@ -160,7 +166,7 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
             padding: const EdgeInsets.all(12.0),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white, // White background for the input box
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
@@ -180,9 +186,9 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
                         decoration: InputDecoration(
                           hintText: 'Type Your Message Here',
                           hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none, // Remove default border
+                          border: InputBorder.none,
                         ),
-                        style: TextStyle(color: Colors.black), // Black text for typing
+                        style: TextStyle(color: Colors.black),
                       ),
                     ),
                   ),
@@ -207,12 +213,15 @@ class _LecturerChatScreenState extends State<LecturerChatScreen>
       'receiverId': widget.senderId,
       'message': _messageController.text.trim(),
       'timestamp': DateTime.now(),
-      'isRead': false, // Add this line to set isRead to false
+      'isRead': false,
     });
 
     _messageController.clear();
 
-    // Trigger animation for the new message
+    // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
     _controller.forward(from: 0);
   }
 

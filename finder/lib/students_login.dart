@@ -46,6 +46,10 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
             .where('Email', isEqualTo: email)
             .where('Password', isEqualTo: password) // Ensure plaintext passwords aren't stored in production
             .get();
+        // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
 
         if (query.docs.isNotEmpty) {
           // Generate and store FCM token
@@ -171,6 +175,11 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 12),
                 ),
+                //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
                 child: _isLoading
                     ? SizedBox(
                   width: 20,

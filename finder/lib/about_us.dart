@@ -4,7 +4,7 @@ class AboutUsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EEDA), // Light beige background
+      backgroundColor: const Color(0xFFF5EEDA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -14,6 +14,11 @@ class AboutUsPage extends StatelessWidget {
             Navigator.pop(context);
           },
         ),
+
+        // Developed By,
+// Imesh Sanjana - 30137 - 10953245
+// Gaveen Ranasinghe - 29934 - 10952369
+// Sehara Gishan - 26041 - 10953243
         title: const Text(
           "About Us",
           style: TextStyle(
@@ -29,7 +34,6 @@ class AboutUsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // University Logo with Card
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -47,7 +51,11 @@ class AboutUsPage extends StatelessWidget {
             ),
             const SizedBox(height: 25),
 
-            // About Us Text in a Stylish Card
+            //Developed By,
+//Nethsara Weerasooriya - 29733 - 10953304
+//Dinuwara Wijerathne - 30406 - 10953246
+//Dihansie Weerasinghe - 30223 - 10952372
+//Chaga Kodikara - 30296 - 10952374
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(

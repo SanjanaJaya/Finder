@@ -141,4 +141,4 @@ A Flutter-based mobile application designed to enhance the campus experience at 
 ### Installation
 1. Clone the repository
    ```sh
-   git clone https://github.com/yourusername/nsbm-campus-companion.git
+   git clone https://github.com/SanjanaJaya/Finder.git

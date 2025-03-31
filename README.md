@@ -1,6 +1,6 @@
 # 🏫 NSBM Finder Mobile Application
 
-![App Banner](https://via.placeholder.com/1200x400) <!-- Replace with your banner image -->
+![App Banner](Screenshots/NSBM_logo.png) <!-- Replace with your banner image -->
 
 A Flutter-based mobile application designed to enhance the campus experience at NSBM Green University by simplifying navigation, communication, and resource booking for both students and lecturers.
 

@@ -44,31 +44,31 @@ A Flutter-based mobile application designed to enhance the campus experience at 
     <img src="Screenshots/lecturer profile.jpg" width="200" alt="Room Booking"/>
     <p><b>Lecturer Profile</b><br>To view Lecturer's details and availability</p>
   </div>
-</div>
+
+  <div>
+    <img src="Screenshots/student chat.jpg" width="200" alt="Room Booking"/>
+    <p><b>Student Chat Screen</b><br>To chat with lecturers</p>
+  </div>
 
 <div>
     <img src="Screenshots/lecturerlocation.jpg" width="200" alt="Room Booking"/>
     <p><b>Lecturer Cabin Location</b><br>To view Lecturer's cabin location</p>
   </div>
-</div>
 
 <div>
     <img src="Screenshots/studyroomslist.jpg" width="200" alt="Room Booking"/>
     <p><b>Study Rooms List</b><br>To view & search study rooms</p>
   </div>
-</div>
 
 <div>
     <img src="Screenshots/studyroomdetails.jpg" width="200" alt="Room Booking"/>
     <p><b>Study Room's Details</b><br>To view study room's details</p>
   </div>
-</div>
 
 <div>
     <img src="Screenshots/studyroom.jpg" width="200" alt="Room Booking"/>
     <p><b>Study Room's Booked Screen</b><br>To view booked study room's details</p>
   </div>
-</div>
 
 <div>
     <img src="Screenshots/studentprofile.jpg" width="200" alt="Room Booking"/>
@@ -80,28 +80,38 @@ A Flutter-based mobile application designed to enhance the campus experience at 
 
 <div align="center">
   <div>
-    <img src="Screenshots/lecturer_login.jpg" width="200" alt="Lecturer Login"/>
-    <p><b>Lecturer Login</b><br>Faculty authentication portal</p>
+    <img src="Screenshots/lecturerdashboard.jpg" width="200" alt="Lecturer Login"/>
+    <p><b>Lecturer Dashboard</b><br>Quick access to all lecturer features</p>
   </div>
   
   <div>
-    <img src="Screenshots/lecturer_dashboard.jpg" width="200" alt="Lecturer Dashboard"/>
-    <p><b>Lecturer Dashboard</b><br>Overview of appointments and requests</p>
+    <img src="Screenshots/lecturerinbox.jpg" width="200" alt="Lecturer Dashboard"/>
+    <p><b>Lecturer Inbox</b><br>To view received messages</p>
   </div>
   
   <div>
-    <img src="Screenshots/appointment_view.jpg" width="200" alt="Appointments"/>
-    <p><b>Appointment Manager</b><br>View and manage student meetings</p>
+    <img src="Screenshots/lecturerchat.jpg" width="200" alt="Appointments"/>
+    <p><b>Lecturer Chat Screen</b><br>To reply for messages</p>
   </div>
   
   <div>
-    <img src="Screenshots/lecturer_chat.jpg" width="200" alt="Lecturer Chat"/>
-    <p><b>Communication Hub</b><br>Messaging interface with students</p>
+    <img src="Screenshots/lecturerappointments.jpg" width="200" alt="Lecturer Chat"/>
+    <p><b>Lecturer's Appointments</b><br>To check appointments</p>
   </div>
   
   <div>
-    <img src="Screenshots/booking_approval.jpg" width="200" alt="Booking Approval"/>
-    <p><b>Booking Approvals</b><br>Manage room reservation requests</p>
+    <img src="Screenshots/lecturerprofile.jpg" width="200" alt="Booking Approval"/>
+    <p><b>Lecturer's Profile</b><br>To view lecturer details</p>
+  </div>
+
+  <div>
+    <img src="Screenshots/aboutus.jpg" width="200" alt="Booking Approval"/>
+    <p><b>About Us</b><br>University Description</p>
+  </div>
+
+  <div>
+    <img src="Screenshots/contactus.jpg" width="200" alt="Booking Approval"/>
+    <p><b>Contact Us</b><br>University contact details</p>
   </div>
 </div>
 

@@ -22,9 +22,9 @@ class _StudentChatScreenState extends State<StudentChatScreen> {
   int _sentMessagesToday = 0;
   final List<String> _predefinedMessages = [
     "Is there a tutorial session for this topic?",
-    "Hello Sir, are you in your cabin now?",
-    "Sir, can I book an appointment?",
-    "Hello sir!",
+    "Hello Lecturer, are you in your cabin now?",
+    "Lecturer, can I book an appointment?",
+    "Hello Lecturer!",
   ];
 
   String lecturerImageUrl = "";

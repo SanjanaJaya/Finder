@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Add Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_svg/flutter_svg.dart'; // For SVG support
+import 'package:flutter_svg/flutter_svg.dart';
 import 'lecturer_list_page.dart';
 import 'study_room_list.dart';
 import 'contact_us.dart';
 import 'about_us.dart';
 import 'view_bookings.dart';
 import 'student_profile_page.dart';
-import 'opening_page.dart'; // Ensure this import is correct
+import 'opening_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: OpeningPage(), // Set OpeningPage as the starting page
+      home: OpeningPage(),
     );
   }
 }
@@ -40,14 +40,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<dynamic> newsItems = [];
-  final PageController _pageController = PageController(viewportFraction: 0.8);
-  Map<String, dynamic>? studentData; // To store student data
+  final PageController _pageController = PageController(viewportFraction: 1.03);
+  Map<String, dynamic>? studentData;
+  int currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     fetchNews();
-    fetchStudentData(); // Fetch student data when the page loads
+    fetchStudentData();
+    _pageController.addListener(() {
+      setState(() {
+        currentPage = _pageController.page?.round() ?? 0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchNews() async {
@@ -60,10 +72,6 @@ class _HomePageState extends State<HomePage> {
       throw Exception('Failed to load news');
     }
   }
-  // Developed By,
-// Imesh Sanjana - 30137 - 10953245
-// Gaveen Ranasinghe - 29934 - 10952369
-// Sehara Gishan - 26041 - 10953243
 
   Future<void> fetchStudentData() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -150,9 +158,9 @@ class _HomePageState extends State<HomePage> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Image.asset(
-                        "assets/campus_large.png", // Replace with a larger image
+                        "assets/campus_large.png",
                         width: double.infinity,
-                        height: 200, // Adjust height to fit the screen
+                        height: 200,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -171,10 +179,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                // Developed By,
-// Imesh Sanjana - 30137 - 10953245
-// Gaveen Ranasinghe - 29934 - 10952369
-// Sehara Gishan - 26041 - 10953243
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -208,54 +212,74 @@ class _HomePageState extends State<HomePage> {
                 ),
                 SizedBox(height: 10),
                 newsItems.isEmpty
-                    ? CircularProgressIndicator()
-                    : SizedBox(
-                  height: 180,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: newsItems.length,
-                    itemBuilder: (context, index) {
-                      final item = newsItems[index];
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: _buildNewsImage(item['image']), // Handle SVG or fallback
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: EdgeInsets.all(8.0),
+                    ? Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: [
+                          SizedBox(
+                            height: 180,
+                            child: PageView.builder(
+                              controller: _pageController,
+                              itemCount: newsItems.length,
+                              itemBuilder: (context, index) {
+                                final item = newsItems[index];
+                                return Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 5.0),
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.5),
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(20),
-                                      bottomRight: Radius.circular(20),
+                                    color: Colors.grey,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Stack(
+                                      children: [
+                                        Positioned.fill(
+                                          child: _buildNewsImage(item['image']),
+                                        ),
+                                        Positioned(
+                                          bottom: 0,
+                                          left: 0,
+                                          right: 0,
+                                          child: Container(
+                                            padding: EdgeInsets.all(8.0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(0.5),
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(20),
+                                                bottomRight: Radius.circular(20),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              item['title'],
+                                              style: TextStyle(fontSize: 16.0, color: Colors.white),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  child: Text(
-                                    item['title'],
-                                    style: TextStyle(fontSize: 16.0, color: Colors.white),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(newsItems.length, (index) {
+                              return AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                margin: EdgeInsets.symmetric(horizontal: 4),
+                                width: currentPage == index ? 12 : 8,
+                                height: currentPage == index ? 12 : 8,
+                                decoration: BoxDecoration(
+                                  color: currentPage == index ? Colors.black87 : Colors.grey[400],
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -284,29 +308,23 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildNewsImage(String imageUrl) {
     if (imageUrl.startsWith('data:image/svg+xml')) {
-      // Handle SVG data URI
       return SvgPicture.network(
         imageUrl,
-        fit: BoxFit.cover, // Make the SVG fill the space
+        fit: BoxFit.cover,
         placeholderBuilder: (context) => Center(
           child: CircularProgressIndicator(),
         ),
       );
     } else {
-      // Handle other image formats (e.g., PNG, JPG)
       return Image.network(
         imageUrl,
-        fit: BoxFit.cover, // Make the image fill the space
+        fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(),
-          );
+          return Center(child: CircularProgressIndicator());
         },
         errorBuilder: (context, error, stackTrace) {
-          return Center(
-            child: Icon(Icons.error, color: Colors.red),
-          );
+          return Center(child: Icon(Icons.error, color: Colors.red));
         },
       );
     }
@@ -345,11 +363,6 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => page));
       },
-      //Developed By,
-//Nethsara Weerasooriya - 29733 - 10953304
-//Dinuwara Wijerathne - 30406 - 10953246
-//Dihansie Weerasinghe - 30223 - 10952372
-//Chaga Kodikara - 30296 - 10952374
       child: Container(
         width: 170,
         height: 50,
